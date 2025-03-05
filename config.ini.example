@@ -1,0 +1,15 @@
+[system]
+mode = dev
+db_url = postgresql://tabekg:123@localhost:5432/ndworld
+api_url = http://localhost:5000
+api_version = 1
+;api_versions = v1
+secret_key = abcd_besoft
+web_url = http://localhost:3000
+storage_path = /Users/tabekg/Projects/ndworld/storage
+port = 5000
+
+[besoft_cloud]
+api_url = https://api.cloud.besoft.kg
+public_key =
+private_key =
