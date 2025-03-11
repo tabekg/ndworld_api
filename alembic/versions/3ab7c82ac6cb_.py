@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 1a3ee56e76af
+Revision ID: 3ab7c82ac6cb
 Revises: 
-Create Date: 2025-03-11 22:09:46.476307
+Create Date: 2025-03-11 22:29:58.062361
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = '1a3ee56e76af'
+revision: str = '3ab7c82ac6cb'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -31,16 +31,6 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_bi_id'), 'bi', ['id'], unique=False)
-    op.create_table('user_providers',
-    sa.Column('name', sa.String(length=255), nullable=False),
-    sa.Column('identity', sa.String(length=255), nullable=False),
-    sa.Column('payload', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
-    sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('created_at', sa.DateTime(), nullable=False),
-    sa.Column('updated_at', sa.DateTime(), nullable=True),
-    sa.PrimaryKeyConstraint('id')
-    )
-    op.create_index(op.f('ix_user_providers_id'), 'user_providers', ['id'], unique=False)
     op.create_table('users',
     sa.Column('first_name', sa.String(length=255), nullable=True),
     sa.Column('last_name', sa.String(length=255), nullable=True),
@@ -57,6 +47,18 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_users_id'), 'users', ['id'], unique=False)
+    op.create_table('auth_providers',
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.String(length=255), nullable=False),
+    sa.Column('identity', sa.String(length=255), nullable=False),
+    sa.Column('payload', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('created_at', sa.DateTime(), nullable=False),
+    sa.Column('updated_at', sa.DateTime(), nullable=True),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_auth_providers_id'), 'auth_providers', ['id'], unique=False)
     op.create_table('user_educations',
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('institution', sa.String(length=255), nullable=False),
@@ -108,10 +110,10 @@ def downgrade() -> None:
     op.drop_table('user_experiences')
     op.drop_index(op.f('ix_user_educations_id'), table_name='user_educations')
     op.drop_table('user_educations')
+    op.drop_index(op.f('ix_auth_providers_id'), table_name='auth_providers')
+    op.drop_table('auth_providers')
     op.drop_index(op.f('ix_users_id'), table_name='users')
     op.drop_table('users')
-    op.drop_index(op.f('ix_user_providers_id'), table_name='user_providers')
-    op.drop_table('user_providers')
     op.drop_index(op.f('ix_bi_id'), table_name='bi')
     op.drop_table('bi')
     # ### end Alembic commands ###

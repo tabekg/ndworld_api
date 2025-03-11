@@ -41,6 +41,7 @@ class User(Base):
     experiences = relationship("UserExperience", back_populates="user", cascade="all, delete-orphan")
     educations = relationship("UserEducation", back_populates="user", cascade="all, delete-orphan")
     skills = relationship("UserSkill", back_populates="user", cascade="all, delete-orphan")
+    auth_providers = relationship("AuthProvider", back_populates="user", cascade="all, delete-orphan")
 
     # warehouse = relationship('Warehouse', foreign_keys=[warehouse_id])
     # selected_warehouse = relationship('Warehouse', foreign_keys=[selected_warehouse_id])
@@ -81,11 +82,3 @@ class UserSkill(Base):
     proficiency = Column(String(50), nullable=True)  # Например, Beginner, Intermediate, Advanced
 
     user = relationship("User", back_populates="skills")
-
-
-class UserProvider(Base):
-    __tablename__ = 'user_providers'
-
-    name = Column(String(255), nullable=False)
-    identity = Column(String(255), nullable=False)
-    payload = Column(mutable_json_type(dbtype=JSONB, nested=True), nullable=True)

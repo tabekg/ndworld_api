@@ -3,7 +3,7 @@ from sqlalchemy import Column, String, Text, DateTime
 # DO NOT REMOVE THIS UNUSED IMPORT
 from utils.database import Base
 
-from . import user
+from . import user, auth
 
 
 # @sa_event.listens_for(packing_request.PackingRequest, 'before_update')
