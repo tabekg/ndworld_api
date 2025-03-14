@@ -1,10 +1,12 @@
 import requests
-from flask import Blueprint, request
+from flask import Blueprint, request, g
 
-from controllers.auth import create_access_token
+from controllers.auth import create_access_token, create_auth_session, create_auth_provider
+from controllers.user import create_user
+from models.auth import AuthProvider
 from utils.config import config
 from utils.exception import ResponseException
-from utils.http import make_response
+from utils.http import make_response, orm_to_dict
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -52,36 +54,48 @@ def verify_otp_post():
     })
 
     json = response.json()
-    payload = json.get('payload') or {}
     status = json.get('status') or 'unknown_error'
+    payload = json.get('payload') or {}
 
     if status == 'unknown_error':
         raise ResponseException(status='besoft_cloud_service_error', status_code=500)
 
-    success_data = {}
-
     if status == 'success':
-        # user = g.db.query(User).filter(
-        #     User.phone_number == payload['phone_number'],
-        #     User.provider_name == 'whatsapp',
-        # ).first()
-        # if user is None:
-        #     user = User(
-        #         provider_name='whatsapp',
-        #         provider_id=payload['phone_number'],
-        #         phone_number=payload['phone_number'],
-        #     )
-        #     g.db.add(user)
-        #     g.db.commit()
-        success_data = {
-            'access_token': create_access_token({'session_id': None}),
-        }
+        auth_provider = g.db.query(AuthProvider).filter(
+            AuthProvider.name == 'whatsapp',
+            AuthProvider.identity == payload['phone_number'],
+        ).first()
+
+        if auth_provider is None:
+            user = create_user(payload['phone_number'])
+            g.db.add(user)
+            g.db.flush()
+
+            auth_provider = create_auth_provider(user.id, 'whatsapp', payload['phone_number'])
+            g.db.add(auth_provider)
+            g.db.flush()
+        else:
+            user = auth_provider.user
+
+        auth_session = create_auth_session(user.id)
+        g.db.add(auth_session)
+        g.db.flush()
+
+        g.db.commit()
+
+        return make_response(
+            payload={
+                'access_token': create_access_token({'sessionHash': auth_session.hash}),
+                'user': orm_to_dict(user, ['created_at']),
+                'auth_session': orm_to_dict(auth_session, ['expired_at', 'is_active', 'created_at']),
+                'auth_provider': orm_to_dict(auth_provider, ['name', 'identity', 'payload']),
+            },
+            status=status,
+            status_code=response.status_code,
+        )
 
     return make_response(
-        payload={
-            **payload,
-            **success_data,
-        },
+        payload=payload,
         status=status,
         status_code=response.status_code,
     )

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Text, DateTime
+from sqlalchemy import Column, String, Text, DateTime, event as sa_event, func
 
 # DO NOT REMOVE THIS UNUSED IMPORT
 from utils.database import Base
@@ -6,9 +6,9 @@ from utils.database import Base
 from . import user, auth
 
 
-# @sa_event.listens_for(packing_request.PackingRequest, 'before_update')
-# def update_version(mapper, connection, target):
-#     target.updated_at = func.now()
+@sa_event.listens_for(user.User, 'before_update')
+def update_version(mapper, connection, target):
+    target.updated_at = func.now()
 
 
 class Bi(Base):

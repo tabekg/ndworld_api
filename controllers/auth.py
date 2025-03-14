@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime, timezone, timedelta
 from functools import wraps
 
@@ -5,6 +6,7 @@ import jwt
 
 from flask import request, g
 
+from models.auth import AuthSession, AuthProvider
 from utils.config import ACCESS_TOKEN_EXPIRE_DAYS, SECRET_KEY
 from utils.exception import ResponseException
 
@@ -60,3 +62,25 @@ def auth_required(roles=None):
         return wrapped_function
 
     return wrapper
+
+
+def create_auth_session(user_id: int, fcm_token=None):
+    session = AuthSession(user_id=user_id)
+
+    session.hash = uuid.uuid4().hex
+    session.fcm_token = fcm_token or None
+    session.ip_address = request.remote_addr
+    session.user_agent = request.headers.get('User-Agent')
+    session.expired_at = datetime.now(tz=timezone.utc) + timedelta(days=ACCESS_TOKEN_EXPIRE_DAYS)
+    session.is_active = True
+
+    return session
+
+
+def create_auth_provider(user_id: int, name: str, identity: str):
+    provider = AuthProvider(user_id=user_id)
+
+    provider.name = name
+    provider.identity = identity or None
+
+    return provider

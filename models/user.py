@@ -34,14 +34,15 @@ class User(Base):
     # role = Column(Enum(UserRoleEnum), nullable=True)
     payload = Column(mutable_json_type(dbtype=JSONB, nested=True), nullable=True)
     is_disabled = Column(Boolean, default=False, nullable=False)
-    fcm_token = Column(String(255), nullable=True)
     # warehouse_id = Column(Integer, ForeignKey('warehouses.id'), nullable=True)
     # selected_warehouse_id = Column(Integer, ForeignKey('warehouses.id'), nullable=True)
 
     experiences = relationship("UserExperience", back_populates="user", cascade="all, delete-orphan")
     educations = relationship("UserEducation", back_populates="user", cascade="all, delete-orphan")
     skills = relationship("UserSkill", back_populates="user", cascade="all, delete-orphan")
+
     auth_providers = relationship("AuthProvider", back_populates="user", cascade="all, delete-orphan")
+    auth_sessions = relationship("AuthSession", back_populates="user", cascade="all, delete-orphan")
 
     # warehouse = relationship('Warehouse', foreign_keys=[warehouse_id])
     # selected_warehouse = relationship('Warehouse', foreign_keys=[selected_warehouse_id])

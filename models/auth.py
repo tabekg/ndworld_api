@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, ForeignKey, Integer
+from sqlalchemy import Column, String, ForeignKey, Integer, DateTime, Boolean
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 from sqlalchemy_json import mutable_json_type
@@ -15,3 +15,17 @@ class AuthProvider(Base):
     payload = Column(mutable_json_type(dbtype=JSONB, nested=True), nullable=True)
 
     user = relationship("User", back_populates="auth_providers")
+
+
+class AuthSession(Base):
+    __tablename__ = "auth_sessions"
+
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    hash = Column(String(255), nullable=False, unique=True)
+    fcm_token = Column(String(255), nullable=True)
+    ip_address = Column(String(45), nullable=True)
+    user_agent = Column(String(512), nullable=True)
+    expired_at = Column(DateTime, nullable=False)
+    is_active = Column(Boolean, default=True, nullable=False)
+
+    user = relationship("User", back_populates="auth_sessions")
