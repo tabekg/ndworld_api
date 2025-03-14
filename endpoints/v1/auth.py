@@ -1,5 +1,7 @@
 import requests
 from flask import Blueprint, request
+
+from controllers.auth import create_access_token
 from utils.config import config
 from utils.exception import ResponseException
 from utils.http import make_response
@@ -58,22 +60,22 @@ def verify_otp_post():
 
     success_data = {}
 
-    # if status == 'success':
-    #     user = g.db.query(User).filter(
-    #         User.phone_number == payload['phone_number'],
-    #         User.provider_name == 'whatsapp',
-    #     ).first()
-    #     if user is None:
-    #         user = User(
-    #             provider_name='whatsapp',
-    #             provider_id=payload['phone_number'],
-    #             phone_number=payload['phone_number'],
-    #         )
-    #         g.db.add(user)
-    #         g.db.commit()
-    #     success_data = {
-    #         'access_token': create_access_token({'id': user.id}),
-    #     }
+    if status == 'success':
+        # user = g.db.query(User).filter(
+        #     User.phone_number == payload['phone_number'],
+        #     User.provider_name == 'whatsapp',
+        # ).first()
+        # if user is None:
+        #     user = User(
+        #         provider_name='whatsapp',
+        #         provider_id=payload['phone_number'],
+        #         phone_number=payload['phone_number'],
+        #     )
+        #     g.db.add(user)
+        #     g.db.commit()
+        success_data = {
+            'access_token': create_access_token({'session_id': None}),
+        }
 
     return make_response(
         payload={
