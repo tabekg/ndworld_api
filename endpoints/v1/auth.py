@@ -11,7 +11,7 @@ bp = Blueprint('auth', __name__, url_prefix='/auth')
 def send_otp_post():
     phone_number = request.json['phone_number']
 
-    assert phone_number and phone_number[0] == '+'
+    assert phone_number and phone_number[0] != '+'
 
     response = requests.post(config.get('besoft_cloud', 'api_url') + '/tp/v1/authentication/send-otp', params={
         '_project_key': config.get('besoft_cloud', 'public_key'),
@@ -24,15 +24,13 @@ def send_otp_post():
 
     json = response.json()
     status = json.get('status') or 'unknown_error'
-    result = json.get('result')
 
     if status == 'unknown_error':
-        raise ResponseException(status='besoft_cloud_service_error')
+        raise ResponseException(status='besoft_cloud_service_error', status_code=500)
 
     return make_response(
         payload=json.get('payload'),
         status=status,
-        result=result,
         status_code=response.status_code,
     )
 
@@ -54,10 +52,9 @@ def verify_otp_post():
     json = response.json()
     payload = json.get('payload') or {}
     status = json.get('status') or 'unknown_error'
-    result = json.get('result')
 
     if status == 'unknown_error':
-        raise ResponseException(status='besoft_cloud_service_error')
+        raise ResponseException(status='besoft_cloud_service_error', status_code=500)
 
     success_data = {}
 
@@ -84,6 +81,5 @@ def verify_otp_post():
             **success_data,
         },
         status=status,
-        result=result,
         status_code=response.status_code,
     )

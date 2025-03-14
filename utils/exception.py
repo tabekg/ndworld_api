@@ -1,13 +1,11 @@
 class ResponseException(Exception):
     payload = None
     status = "unknown_error"
-    result = -1
     status_code = 500
 
-    def __init__(self, payload=None, status='unknown_error', result=-1, status_code=500):
+    def __init__(self, payload=None, status='unknown_error', status_code=500):
         self.payload = payload
         self.status = status
-        self.result = result
         self.status_code = status_code
 
     def __str__(self):

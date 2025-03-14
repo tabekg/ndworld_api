@@ -28,37 +28,37 @@ def after_request(response):
 
 @app.errorhandler(NoResultFound)
 def no_result_found_handler(e):
-    return {'status': 'not_found', 'result': -1, 'payload': {'message': str(e)}}, 404
+    return {'status': 'not_found', 'payload': {'message': str(e)}}, 404
 
 
 @app.errorhandler(MultipleResultsFound)
 def multiple_result_found_handler(e):
-    return {'status': 'multiple_result_found', 'result': -1, 'payload': {'message': str(e)}}, 403
+    return {'status': 'multiple_result_found', 'payload': {'message': str(e)}}, 403
 
 
 @app.errorhandler(ResponseException)
 def app_exception_handler(e):
-    return {'status': e.status, 'result': e.result, 'payload': e.payload}, e.status_code
+    return {'status': e.status, 'payload': e.payload}, e.status_code
 
 
 @app.errorhandler(KeyError)
 def app_exception_handler(e):
-    return {'status': 'not_enough_params', 'result': -1, 'payload': str(e)}, 403
+    return {'status': 'not_enough_params', 'payload': str(e)}, 403
 
 
 @app.errorhandler(AssertionError)
 def app_exception_handler(e):
-    return {'status': 'assertion_error', 'result': -1, 'payload': str(e)}, 403
+    return {'status': 'assertion_error', 'payload': str(e)}, 403
 
 
 @app.errorhandler(ValueError)
 def app_exception_handler(e):
-    return {'status': 'invalid_params', 'result': -1, 'payload': str(e)}, 403
+    return {'status': 'invalid_params', 'payload': str(e)}, 403
 
 
 @app.errorhandler(IndexError)
 def app_exception_handler(e):
-    return {'status': 'unknown_error', 'result': -1, 'payload': str(e)}, 403
+    return {'status': 'unknown_error', 'payload': str(e)}, 403
 
 
 @app.route('/storage/<string:directory>/<path:path>', methods=['GET'])

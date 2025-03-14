@@ -1,8 +1,7 @@
-def make_response(payload=None, status='success', status_code=200, result=0):
+def make_response(payload=None, status='success', status_code=200):
     return {
         'status': status,
         'payload': payload,
-        'result': result,
     }, status_code
 
 
