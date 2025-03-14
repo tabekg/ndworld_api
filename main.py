@@ -4,7 +4,7 @@ from flask_cors import CORS
 from flask import Flask, g, send_file
 from sqlalchemy.exc import NoResultFound, MultipleResultsFound
 
-from endpoints import v1
+from endpoints import bp as endpoints
 from utils.database import SessionLocal
 from utils.config import STORAGE_PATH, STORAGE_DIRECTORIES
 from utils.exception import ResponseException
@@ -75,4 +75,4 @@ def storage_get(directory, path):
         )
 
 
-app.register_blueprint(v1.bp)
+app.register_blueprint(endpoints.bp)
