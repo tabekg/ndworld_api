@@ -7,6 +7,7 @@ import jwt
 from flask import request, g
 
 from models.auth import AuthSession, AuthProvider
+from models.user import User
 from utils.config import ACCESS_TOKEN_EXPIRE_DAYS, SECRET_KEY
 from utils.exception import ResponseException
 
@@ -21,6 +22,10 @@ def create_access_token(data):
 
 def check_auth_token():
     token = request.headers['Authorization'][7:] if 'Authorization' in request.headers else None
+
+    if not token:
+        token = request.cookies.get('token')
+
     try:
         if not token:
             g.user = None
@@ -29,15 +34,13 @@ def check_auth_token():
                 token,
                 SECRET_KEY,
                 options={"require": ["exp", "iss"]},
-                issuer='besoft:cloud',
+                issuer='ndworld',
                 algorithms=["HS256"],
             )
-            # TODO: user model
-            # g.user = g.db.query(User) \
-            #     .filter_by(id=data['id']) \
-            #     .first()
-            # if g.user and g.user.is_disabled is True:
-            #     g.user = None
+            g.auth_session = g.db.query(AuthSession).filter(AuthSession.hash == data['sessionHash']).one()
+            g.user = g.db.query(User) \
+                .filter(User.id == g.auth_session.user_id, User.is_disabled.isnot(True)) \
+                .first()
     except Exception as e:
         raise ResponseException(payload=str(e), status='token_is_invalid', status_code=401)
 

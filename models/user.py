@@ -18,11 +18,6 @@ from utils.database import Base
 class User(Base):
     __tablename__ = 'users'
 
-    # provider_name = Column(String(255), nullable=False)
-    # provider_uid = Column(String(255), nullable=True)
-    # provider_id = Column(String(255), nullable=False)
-    # number = Column(String(35), nullable=True)
-    # encrypted_password = Column(String(255), nullable=True)
     first_name = Column(String(255), nullable=True)
     last_name = Column(String(255), nullable=True)
 
@@ -34,8 +29,6 @@ class User(Base):
     # role = Column(Enum(UserRoleEnum), nullable=True)
     payload = Column(mutable_json_type(dbtype=JSONB, nested=True), nullable=True)
     is_disabled = Column(Boolean, default=False, nullable=False)
-    # warehouse_id = Column(Integer, ForeignKey('warehouses.id'), nullable=True)
-    # selected_warehouse_id = Column(Integer, ForeignKey('warehouses.id'), nullable=True)
 
     experiences = relationship("UserExperience", back_populates="user", cascade="all, delete-orphan")
     educations = relationship("UserEducation", back_populates="user", cascade="all, delete-orphan")
@@ -43,10 +36,6 @@ class User(Base):
 
     auth_providers = relationship("AuthProvider", back_populates="user", cascade="all, delete-orphan")
     auth_sessions = relationship("AuthSession", back_populates="user", cascade="all, delete-orphan")
-
-    # warehouse = relationship('Warehouse', foreign_keys=[warehouse_id])
-    # selected_warehouse = relationship('Warehouse', foreign_keys=[selected_warehouse_id])
-    # codes = relationship('UserCode', back_populates='user')
 
 
 class UserExperience(Base):
