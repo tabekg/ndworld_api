@@ -75,4 +75,4 @@ def storage_get(directory, path):
         )
 
 
-app.register_blueprint(endpoints.bp)
+app.register_blueprint(endpoints)
