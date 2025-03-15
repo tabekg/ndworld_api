@@ -8,6 +8,6 @@ bp.register_blueprint(auth.bp)
 bp.register_blueprint(user.bp)
 
 
-@bp.get('/')
+@bp.get('')
 def index_get():
     return make_response()

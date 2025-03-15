@@ -4,6 +4,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy_json import mutable_json_type
 
 from utils.database import Base
+from utils.http import orm_to_dict
 
 
 # class UserRoleEnum(str, enum.Enum):
@@ -37,6 +38,18 @@ class User(Base):
     auth_providers = relationship("AuthProvider", back_populates="user", cascade="all, delete-orphan")
     auth_sessions = relationship("AuthSession", back_populates="user", cascade="all, delete-orphan")
 
+    def to_dict_item(self):
+        return orm_to_dict(self, [
+            'first_name', 'last_name',
+            'contact_email', 'contact_phone_number',
+            'birth_date', 'about', 'payload', 'is_disabled',
+            'created_at',
+        ], additional_fields={
+            'experiences': lambda a: orm_to_dict(a.experiences),
+            'educations': lambda a: orm_to_dict(a.educations),
+            'skills': lambda a: orm_to_dict(a.skills),
+        })
+
 
 class UserExperience(Base):
     __tablename__ = 'user_experiences'
@@ -49,6 +62,12 @@ class UserExperience(Base):
     description = Column(Text, nullable=True)
 
     user = relationship("User", back_populates="experiences")
+
+    def to_dict_item(self):
+        return orm_to_dict(self, [])
+
+    def to_dict_list(self):
+        return orm_to_dict(self, [])
 
 
 class UserEducation(Base):
@@ -63,12 +82,24 @@ class UserEducation(Base):
 
     user = relationship("User", back_populates="educations")
 
+    def to_dict_item(self):
+        return orm_to_dict(self, [])
+
+    def to_dict_list(self):
+        return orm_to_dict(self, [])
+
 
 class UserSkill(Base):
     __tablename__ = 'user_skills'
 
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     skill_name = Column(String(100), nullable=False)
-    proficiency = Column(String(50), nullable=True)  # Например, Beginner, Intermediate, Advanced
+    proficiency = Column(String(50), nullable=True)  # Beginner, Intermediate, Advanced
 
     user = relationship("User", back_populates="skills")
+
+    def to_dict_item(self):
+        return orm_to_dict(self, [])
+
+    def to_dict_list(self):
+        return orm_to_dict(self, [])

@@ -6,7 +6,7 @@ from controllers.user import create_user
 from models.auth import AuthProvider
 from utils.config import config
 from utils.exception import ResponseException
-from utils.http import make_response, orm_to_dict
+from utils.http import make_response
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
@@ -86,9 +86,9 @@ def verify_otp_post():
         return make_response(
             payload={
                 'access_token': create_access_token({'sessionHash': auth_session.hash}),
-                'user': orm_to_dict(user, ['created_at']),
-                'auth_session': orm_to_dict(auth_session, ['expired_at', 'is_active', 'created_at']),
-                'auth_provider': orm_to_dict(auth_provider, ['name', 'identity', 'payload']),
+                'user': user.to_dict_item(),
+                'auth_session': auth_session.to_dict_item(),
+                'auth_provider': auth_provider.to_dict_item(),
             },
             status=status,
             status_code=response.status_code,
