@@ -2,7 +2,7 @@ import os
 
 from flask_cors import CORS
 from flask import Flask, g, send_file
-from sqlalchemy.exc import NoResultFound, MultipleResultsFound
+from sqlalchemy.exc import NoResultFound, MultipleResultsFound, DataError
 
 from endpoints import bp as endpoints
 from utils.database import SessionLocal
@@ -43,7 +43,7 @@ def app_exception_handler(e):
 
 @app.errorhandler(KeyError)
 def app_exception_handler(e):
-    return {'status': 'not_enough_params', 'payload': str(e)}, 403
+    return {'status': 'not_enough_params', 'payload': {'message': f'Param {str(e)} is required'}}, 403
 
 
 @app.errorhandler(AssertionError)
@@ -59,6 +59,11 @@ def app_exception_handler(e):
 @app.errorhandler(IndexError)
 def app_exception_handler(e):
     return {'status': 'unknown_error', 'payload': str(e)}, 403
+
+
+@app.errorhandler(DataError)
+def data_error_handler(e):
+    return {'status': 'data_error', 'payload': repr(e)}, 403
 
 
 @app.route('/storage/<string:directory>/<path:path>', methods=['GET'])

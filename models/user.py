@@ -83,10 +83,10 @@ class UserEducation(Base):
     user = relationship("User", back_populates="educations")
 
     def to_dict_item(self):
-        return orm_to_dict(self, [])
+        return orm_to_dict(self, ['institution', 'degree', 'start_date', 'end_date', 'description', 'created_at'])
 
     def to_dict_list(self):
-        return orm_to_dict(self, [])
+        return orm_to_dict(self, ['institution', 'degree', 'start_date', 'end_date'])
 
 
 class UserSkill(Base):
@@ -99,7 +99,7 @@ class UserSkill(Base):
     user = relationship("User", back_populates="skills")
 
     def to_dict_item(self):
-        return orm_to_dict(self, [])
+        return orm_to_dict(self, ['skill_name', 'proficiency', 'created_at'])
 
     def to_dict_list(self):
-        return orm_to_dict(self, [])
+        return orm_to_dict(self, ['skill_name', 'proficiency'])

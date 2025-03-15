@@ -17,7 +17,7 @@ def orm_to_dict(orm, keys=None, additional_fields=None):
     if isinstance(orm, list):
         items = []
         for i in orm:
-            if keys is None and hasattr(i, 'to_dict_list'):
+            if len(keys) == 1 and hasattr(i, 'to_dict_list'):
                 d = i.to_dict_list()
             else:
                 d = {}
