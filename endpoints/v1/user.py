@@ -1,7 +1,7 @@
 from flask import Blueprint, g, request
 
 from controllers.auth import auth_required
-from models.user import UserSkill, UserEducation
+from models.user import UserSkill, UserEducation, UserExperience
 from utils.http import make_response, orm_to_dict
 
 bp = Blueprint('user', __name__, url_prefix='/user')
@@ -10,6 +10,24 @@ bp = Blueprint('user', __name__, url_prefix='/user')
 @bp.get('')
 @auth_required()
 def index_get():
+    return make_response(g.user.to_dict_item())
+
+
+@bp.post('')
+@auth_required()
+def index_post():
+    data = request.json
+
+    g.user.first_name = data.get('first_name', g.user.first_name) or None
+    g.user.last_name = data.get('last_name', g.user.last_name) or None
+
+    g.user.contact_email = data.get('contact_email', g.user.contact_email) or None
+    g.user.contact_phone_number = data.get('contact_phone_number', g.user.contact_phone_number) or None
+    g.user.birth_date = data.get('birth_date', g.user.birth_date) or None
+    g.user.about = data.get('about', g.user.about) or None
+
+    g.db.commit()
+
     return make_response(g.user.to_dict_item())
 
 
@@ -44,24 +62,6 @@ def skill_post():
     return make_response(item.to_dict_item())
 
 
-@bp.post('')
-@auth_required()
-def index_post():
-    data = request.json
-
-    g.user.first_name = data.get('first_name', g.user.first_name) or None
-    g.user.last_name = data.get('last_name', g.user.last_name) or None
-
-    g.user.contact_email = data.get('contact_email', g.user.contact_email) or None
-    g.user.contact_phone_number = data.get('contact_phone_number', g.user.contact_phone_number) or None
-    g.user.birth_date = data.get('birth_date', g.user.birth_date) or None
-    g.user.about = data.get('about', g.user.about) or None
-
-    g.db.commit()
-
-    return make_response(g.user.to_dict_item())
-
-
 @bp.get('/education')
 @auth_required()
 def education_get():
@@ -89,6 +89,42 @@ def education_post():
 
     item.institution = data.get('institution', item.institution) or item.institution
     item.degree = data.get('degree', item.degree) or item.degree
+    item.start_date = data.get('start_date', item.start_date) or item.start_date
+    item.end_date = data.get('end_date', item.end_date) or None
+    item.description = data.get('description', item.description) or None
+
+    g.db.commit()
+
+    return make_response(item.to_dict_item())
+
+
+@bp.get('/experience')
+@auth_required()
+def experience_get():
+    return make_response(orm_to_dict(g.user.experiences))
+
+
+@bp.post('/experience')
+@auth_required()
+def experience_post():
+    data = request.json
+    id_ = data.get('id') or None
+
+    if id_ is not None and id_:
+        item = g.db.query(UserExperience).filter(UserExperience.user_id == g.user.id, UserExperience.id == id_).one()
+    else:
+        item = UserExperience(user_id=g.user.id)
+        assert data['company'] and data['position'] and data['start_date']
+        assert g.db.query(UserExperience).filter(
+            UserEducation.user_id == g.user.id,
+            UserEducation.company == data['company'],
+            UserEducation.position == data['position'],
+        ).first() is None
+
+        g.db.add(item)
+
+    item.company = data.get('company', item.company) or item.company
+    item.position = data.get('position', item.position) or item.position
     item.start_date = data.get('start_date', item.start_date) or item.start_date
     item.end_date = data.get('end_date', item.end_date) or None
     item.description = data.get('description', item.description) or None

@@ -64,10 +64,10 @@ class UserExperience(Base):
     user = relationship("User", back_populates="experiences")
 
     def to_dict_item(self):
-        return orm_to_dict(self, [])
+        return orm_to_dict(self, ['company', 'position', 'start_date', 'end_date', 'description', 'created_at'])
 
     def to_dict_list(self):
-        return orm_to_dict(self, [])
+        return orm_to_dict(self, ['company', 'position', 'start_date', 'end_date'])
 
 
 class UserEducation(Base):
