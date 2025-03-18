@@ -116,9 +116,9 @@ def experience_post():
         item = UserExperience(user_id=g.user.id)
         assert data['company'] and data['position'] and data['start_date']
         assert g.db.query(UserExperience).filter(
-            UserEducation.user_id == g.user.id,
-            UserEducation.company == data['company'],
-            UserEducation.position == data['position'],
+            UserExperience.user_id == g.user.id,
+            UserExperience.company == data['company'],
+            UserExperience.position == data['position'],
         ).first() is None
 
         g.db.add(item)
