@@ -42,7 +42,8 @@ class User(Base):
         return orm_to_dict(self, [
             'first_name', 'last_name',
             'contact_email', 'contact_phone_number',
-            'birth_date', 'about', 'payload', 'is_disabled',
+            'birth_date', 'about',
+            'payload', 'is_disabled',
             'created_at',
         ], additional_fields={
             'experiences': lambda a: orm_to_dict(a.experiences),
@@ -67,7 +68,7 @@ class UserExperience(Base):
         return orm_to_dict(self, ['company', 'position', 'start_date', 'end_date', 'description', 'created_at'])
 
     def to_dict_list(self):
-        return orm_to_dict(self, ['company', 'position', 'start_date', 'end_date'])
+        return orm_to_dict(self, ['company', 'position', 'start_date', 'end_date', 'description', 'created_at'])
 
 
 class UserEducation(Base):
@@ -86,7 +87,7 @@ class UserEducation(Base):
         return orm_to_dict(self, ['institution', 'degree', 'start_date', 'end_date', 'description', 'created_at'])
 
     def to_dict_list(self):
-        return orm_to_dict(self, ['institution', 'degree', 'start_date', 'end_date'])
+        return orm_to_dict(self, ['institution', 'degree', 'start_date', 'end_date', 'description', 'created_at'])
 
 
 class UserSkill(Base):
@@ -102,4 +103,4 @@ class UserSkill(Base):
         return orm_to_dict(self, ['skill_name', 'proficiency', 'created_at'])
 
     def to_dict_list(self):
-        return orm_to_dict(self, ['skill_name', 'proficiency'])
+        return orm_to_dict(self, ['skill_name', 'proficiency', 'created_at'])
