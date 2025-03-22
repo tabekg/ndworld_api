@@ -29,6 +29,9 @@ class User(Base):
     birth_date = Column(Date, nullable=True)
     about = Column(Text, nullable=True)
 
+    photo_path = Column(String(255), nullable=True)
+    photo_id = Column(Integer, nullable=True)
+
     # role = Column(Enum(UserRoleEnum), nullable=True)
     payload = Column(mutable_json_type(dbtype=JSONB, nested=True), nullable=True)
     is_disabled = Column(Boolean, default=False, nullable=False)
