@@ -49,7 +49,9 @@ class User(Base):
             'contact_email', 'contact_phone_number',
             'birth_date', 'about',
             'payload', 'is_disabled',
-            'created_at', 'marital_status', 'summary',
+            'marital_status', 'summary',
+            'image_path',
+            'created_at',
         ], additional_fields={
             'experiences': lambda a: orm_to_dict(a.experiences),
             'educations': lambda a: orm_to_dict(a.educations),
