@@ -25,6 +25,7 @@ def index_post():
     g.user.contact_phone_number = data.get('contact_phone_number', g.user.contact_phone_number) or None
     g.user.birth_date = data.get('birth_date', g.user.birth_date) or None
     g.user.about = data.get('about', g.user.about) or None
+    g.user.summary = data.get('summary', g.user.summary) or None
 
     g.db.commit()
 

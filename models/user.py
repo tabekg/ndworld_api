@@ -22,8 +22,10 @@ class User(Base):
     first_name = Column(String(255), nullable=True)
     last_name = Column(String(255), nullable=True)
 
+    summary = Column(Text, nullable=True)
     contact_email = Column(String(255), nullable=True)
     contact_phone_number = Column(String(255), nullable=True)
+    marital_status = Column(String(255), nullable=True)
     birth_date = Column(Date, nullable=True)
     about = Column(Text, nullable=True)
 
@@ -44,7 +46,7 @@ class User(Base):
             'contact_email', 'contact_phone_number',
             'birth_date', 'about',
             'payload', 'is_disabled',
-            'created_at',
+            'created_at', 'marital_status', 'summary',
         ], additional_fields={
             'experiences': lambda a: orm_to_dict(a.experiences),
             'educations': lambda a: orm_to_dict(a.educations),
