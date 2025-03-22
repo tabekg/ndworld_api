@@ -50,7 +50,7 @@ class User(Base):
             'birth_date', 'about',
             'payload', 'is_disabled',
             'marital_status', 'summary',
-            'image_path',
+            'photo_path',
             'created_at',
         ], additional_fields={
             'experiences': lambda a: orm_to_dict(a.experiences),
