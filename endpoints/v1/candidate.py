@@ -14,6 +14,38 @@ def before_request():
     pass
 
 
+@bp.get('')
+def index_get():
+    return make_response(g.candidate.to_dict_item())
+
+
+@bp.post('')
+def index_post():
+    data = request.json
+    photo_id = data.get('photo_id', g.candidate.photo_id)
+
+    if photo_id != g.candidate.photo_id:
+        if g.candidate.photo_id is not None:
+            unlink_image(g.candidate.photo_id, f'candidate_photo_{g.candidate.id}')
+        if photo_id is not None:
+            res = link_image(photo_id, f'candidate_photo_{g.candidate.id}')
+            g.candidate.photo_id = photo_id
+            g.candidate.photo_path = res['path']
+        else:
+            g.candidate.photo_id = None
+            g.candidate.photo_path = None
+
+    g.candidate.contact_email = data.get('contact_email', g.candidate.contact_email) or None
+    g.candidate.contact_phone_number = data.get('contact_phone_number', g.candidate.contact_phone_number) or None
+    g.candidate.birth_date = data.get('birth_date', g.candidate.birth_date) or None
+    g.candidate.about = data.get('about', g.candidate.about) or None
+    g.candidate.summary = data.get('summary', g.candidate.summary) or None
+
+    g.db.commit()
+
+    return make_response(g.candidate.to_dict_item())
+
+
 @bp.get('/passport')
 def passport_get():
     return make_response({

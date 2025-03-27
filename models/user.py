@@ -36,4 +36,6 @@ class User(Base):
             'first_name', 'last_name',
             'payload', 'is_disabled',
             'created_at',
-        ])
+        ], additional_fields={
+            'candidate': lambda a: a.candidate.to_dict_item() if a.candidate else None,
+        })

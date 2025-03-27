@@ -67,9 +67,7 @@ def verify_otp_post():
         ).first()
 
         if auth_provider is None:
-            user = create_user(payload['phone_number'])
-            g.db.add(user)
-            g.db.flush()
+            user = create_user(g.db, 'candidate', payload['phone_number'])
 
             auth_provider = create_auth_provider(user.id, 'whatsapp', payload['phone_number'])
             g.db.add(auth_provider)
