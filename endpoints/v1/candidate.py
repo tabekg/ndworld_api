@@ -1,7 +1,7 @@
 from flask import Blueprint, g, request
 
 from controllers.auth import candidate_required
-from models.candidate import CandidateSkill
+from models.candidate import CandidateSkill, CandidateEducation, CandidateExperience
 from utils.http import make_response, orm_to_dict
 from utils.image import link_image, unlink_image
 
@@ -124,33 +124,33 @@ def education_get():
     return make_response(orm_to_dict(g.candidate.educations))
 
 
-# @bp.post('/education')
-# def education_post():
-#     data = request.json
-#     id_ = data.get('id') or None
-#
-#     if id_ is not None and id_:
-#         item = g.db.query(UserEducation).filter(UserEducation.user_id == g.user.id, UserEducation.id == id_).one()
-#     else:
-#         item = UserEducation(user_id=g.user.id)
-#         assert data['institution'] and data['degree'] and data['start_date']
-#         assert g.db.query(UserEducation).filter(
-#             UserEducation.user_id == g.user.id,
-#             UserEducation.institution == data['institution'],
-#             UserEducation.degree == data['degree'],
-#         ).first() is None
-#
-#         g.db.add(item)
-#
-#     item.institution = data.get('institution', item.institution) or item.institution
-#     item.degree = data.get('degree', item.degree) or item.degree
-#     item.start_date = data.get('start_date', item.start_date) or item.start_date
-#     item.end_date = data.get('end_date', item.end_date) or None
-#     item.description = data.get('description', item.description) or None
-#
-#     g.db.commit()
-#
-#     return make_response(item.to_dict_item())
+@bp.post('/education')
+def education_post():
+    data = request.json
+    id_ = data.get('id') or None
+
+    if id_ is not None and id_:
+        item = g.db.query(CandidateEducation).filter(CandidateEducation.candidate_id == g.candidate.id, CandidateEducation.id == id_).one()
+    else:
+        item = CandidateEducation(candidate_id=g.candidate.id)
+        assert data['institution'] and data['degree'] and data['start_date']
+        assert g.db.query(CandidateEducation).filter(
+            CandidateEducation.candidate_id == g.candidate.id,
+            CandidateEducation.institution == data['institution'],
+            CandidateEducation.degree == data['degree'],
+        ).first() is None
+
+        g.db.add(item)
+
+    item.institution = data.get('institution', item.institution) or item.institution
+    item.degree = data.get('degree', item.degree) or item.degree
+    item.start_date = data.get('start_date', item.start_date) or item.start_date
+    item.end_date = data.get('end_date', item.end_date) or None
+    item.description = data.get('description', item.description) or None
+
+    g.db.commit()
+
+    return make_response(item.to_dict_item())
 
 
 @bp.get('/experience')
@@ -158,30 +158,30 @@ def experience_get():
     return make_response(orm_to_dict(g.candidate.experiences))
 
 
-# @bp.post('/experience')
-# def experience_post():
-#     data = request.json
-#     id_ = data.get('id') or None
-#
-#     if id_ is not None and id_:
-#         item = g.db.query(UserExperience).filter(UserExperience.user_id == g.user.id, UserExperience.id == id_).one()
-#     else:
-#         item = UserExperience(user_id=g.user.id)
-#         assert data['company'] and data['position'] and data['start_date']
-#         assert g.db.query(UserExperience).filter(
-#             UserExperience.user_id == g.user.id,
-#             UserExperience.company == data['company'],
-#             UserExperience.position == data['position'],
-#         ).first() is None
-#
-#         g.db.add(item)
-#
-#     item.company = data.get('company', item.company) or item.company
-#     item.position = data.get('position', item.position) or item.position
-#     item.start_date = data.get('start_date', item.start_date) or item.start_date
-#     item.end_date = data.get('end_date', item.end_date) or None
-#     item.description = data.get('description', item.description) or None
-#
-#     g.db.commit()
-#
-#     return make_response(item.to_dict_item())
+@bp.post('/experience')
+def experience_post():
+    data = request.json
+    id_ = data.get('id') or None
+
+    if id_ is not None and id_:
+        item = g.db.query(CandidateExperience).filter(CandidateExperience.candidate_id == g.candidate.id, CandidateExperience.id == id_).one()
+    else:
+        item = CandidateExperience(candidate_id=g.candidate.id)
+        assert data['company'] and data['position'] and data['start_date']
+        assert g.db.query(CandidateExperience).filter(
+            CandidateExperience.candidate_id == g.candidate.id,
+            CandidateExperience.company == data['company'],
+            CandidateExperience.position == data['position'],
+        ).first() is None
+
+        g.db.add(item)
+
+    item.company = data.get('company', item.company) or item.company
+    item.position = data.get('position', item.position) or item.position
+    item.start_date = data.get('start_date', item.start_date) or item.start_date
+    item.end_date = data.get('end_date', item.end_date) or None
+    item.description = data.get('description', item.description) or None
+
+    g.db.commit()
+
+    return make_response(item.to_dict_item())
