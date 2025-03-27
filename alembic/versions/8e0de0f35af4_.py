@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 3ab7c82ac6cb
+Revision ID: 8e0de0f35af4
 Revises: 
-Create Date: 2025-03-11 22:29:58.062361
+Create Date: 2025-03-27 18:59:42.282909
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = '3ab7c82ac6cb'
+revision: str = '8e0de0f35af4'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -34,13 +34,8 @@ def upgrade() -> None:
     op.create_table('users',
     sa.Column('first_name', sa.String(length=255), nullable=True),
     sa.Column('last_name', sa.String(length=255), nullable=True),
-    sa.Column('contact_email', sa.String(length=255), nullable=True),
-    sa.Column('contact_phone_number', sa.String(length=255), nullable=True),
-    sa.Column('birth_date', sa.Date(), nullable=True),
-    sa.Column('about', sa.Text(), nullable=True),
     sa.Column('payload', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
     sa.Column('is_disabled', sa.Boolean(), nullable=False),
-    sa.Column('fcm_token', sa.String(length=255), nullable=True),
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
@@ -59,8 +54,45 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_auth_providers_id'), 'auth_providers', ['id'], unique=False)
-    op.create_table('user_educations',
+    op.create_table('auth_sessions',
     sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('hash', sa.String(length=255), nullable=False),
+    sa.Column('fcm_token', sa.String(length=255), nullable=True),
+    sa.Column('ip_address', sa.String(length=45), nullable=True),
+    sa.Column('user_agent', sa.String(length=512), nullable=True),
+    sa.Column('expired_at', sa.DateTime(), nullable=False),
+    sa.Column('is_active', sa.Boolean(), nullable=False),
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('created_at', sa.DateTime(), nullable=False),
+    sa.Column('updated_at', sa.DateTime(), nullable=True),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('hash')
+    )
+    op.create_index(op.f('ix_auth_sessions_id'), 'auth_sessions', ['id'], unique=False)
+    op.create_table('candidates',
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('summary', sa.Text(), nullable=True),
+    sa.Column('contact_email', sa.String(length=255), nullable=True),
+    sa.Column('contact_phone_number', sa.String(length=255), nullable=True),
+    sa.Column('marital_status', sa.String(length=255), nullable=True),
+    sa.Column('birth_date', sa.Date(), nullable=True),
+    sa.Column('about', sa.Text(), nullable=True),
+    sa.Column('photo_path', sa.String(length=255), nullable=True),
+    sa.Column('photo_id', sa.Integer(), nullable=True),
+    sa.Column('front_passport_id', sa.Integer(), nullable=True),
+    sa.Column('back_passport_id', sa.Integer(), nullable=True),
+    sa.Column('front_passport_path', sa.String(length=255), nullable=True),
+    sa.Column('back_passport_path', sa.String(length=255), nullable=True),
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('created_at', sa.DateTime(), nullable=False),
+    sa.Column('updated_at', sa.DateTime(), nullable=True),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_candidates_id'), 'candidates', ['id'], unique=False)
+    op.create_table('candidate_educations',
+    sa.Column('candidate_id', sa.Integer(), nullable=False),
     sa.Column('institution', sa.String(length=255), nullable=False),
     sa.Column('degree', sa.String(length=255), nullable=False),
     sa.Column('start_date', sa.Date(), nullable=False),
@@ -69,12 +101,12 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
-    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
+    sa.ForeignKeyConstraint(['candidate_id'], ['candidates.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_index(op.f('ix_user_educations_id'), 'user_educations', ['id'], unique=False)
-    op.create_table('user_experiences',
-    sa.Column('user_id', sa.Integer(), nullable=False),
+    op.create_index(op.f('ix_candidate_educations_id'), 'candidate_educations', ['id'], unique=False)
+    op.create_table('candidate_experiences',
+    sa.Column('candidate_id', sa.Integer(), nullable=False),
     sa.Column('company', sa.String(length=255), nullable=False),
     sa.Column('position', sa.String(length=255), nullable=False),
     sa.Column('start_date', sa.Date(), nullable=False),
@@ -83,33 +115,37 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
-    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
+    sa.ForeignKeyConstraint(['candidate_id'], ['candidates.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_index(op.f('ix_user_experiences_id'), 'user_experiences', ['id'], unique=False)
-    op.create_table('user_skills',
-    sa.Column('user_id', sa.Integer(), nullable=False),
+    op.create_index(op.f('ix_candidate_experiences_id'), 'candidate_experiences', ['id'], unique=False)
+    op.create_table('candidate_skills',
+    sa.Column('candidate_id', sa.Integer(), nullable=False),
     sa.Column('skill_name', sa.String(length=100), nullable=False),
     sa.Column('proficiency', sa.String(length=50), nullable=True),
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
-    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
+    sa.ForeignKeyConstraint(['candidate_id'], ['candidates.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
-    op.create_index(op.f('ix_user_skills_id'), 'user_skills', ['id'], unique=False)
+    op.create_index(op.f('ix_candidate_skills_id'), 'candidate_skills', ['id'], unique=False)
     # ### end Alembic commands ###
 
 
 def downgrade() -> None:
     """Downgrade schema."""
     # ### commands auto generated by Alembic - please adjust! ###
-    op.drop_index(op.f('ix_user_skills_id'), table_name='user_skills')
-    op.drop_table('user_skills')
-    op.drop_index(op.f('ix_user_experiences_id'), table_name='user_experiences')
-    op.drop_table('user_experiences')
-    op.drop_index(op.f('ix_user_educations_id'), table_name='user_educations')
-    op.drop_table('user_educations')
+    op.drop_index(op.f('ix_candidate_skills_id'), table_name='candidate_skills')
+    op.drop_table('candidate_skills')
+    op.drop_index(op.f('ix_candidate_experiences_id'), table_name='candidate_experiences')
+    op.drop_table('candidate_experiences')
+    op.drop_index(op.f('ix_candidate_educations_id'), table_name='candidate_educations')
+    op.drop_table('candidate_educations')
+    op.drop_index(op.f('ix_candidates_id'), table_name='candidates')
+    op.drop_table('candidates')
+    op.drop_index(op.f('ix_auth_sessions_id'), table_name='auth_sessions')
+    op.drop_table('auth_sessions')
     op.drop_index(op.f('ix_auth_providers_id'), table_name='auth_providers')
     op.drop_table('auth_providers')
     op.drop_index(op.f('ix_users_id'), table_name='users')

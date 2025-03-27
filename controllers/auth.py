@@ -45,21 +45,39 @@ def check_auth_token():
         raise ResponseException(payload=str(e), status='token_is_invalid', status_code=401)
 
 
-def check_user(roles=None):
+def check_user(role=None):
     if request.method == 'OPTIONS':
         return
     check_auth_token()
     if not hasattr(g, 'user') or not g.user:
         raise ResponseException(payload='User not authorized', status='not_authorized', status_code=401)
-    if roles is not None and g.user.role not in roles:
-        raise ResponseException(payload='The user has no permission', status='access_denied', status_code=403)
+    if role is not None:
+        if role == 'candidate':
+            g.candidate = g.user.candidate
+
+            if not g.candidate:
+                raise ResponseException(payload='The user has no permission', status='access_denied', status_code=403)
+        else:
+            raise ResponseException(payload='The user has no permission', status='access_denied', status_code=403)
 
 
-def auth_required(roles=None):
+def auth_required(role=None):
     def wrapper(fn):
         @wraps(fn)
         def wrapped_function(*args, **kwargs):
-            check_user(roles=roles)
+            check_user(role=role)
+            return fn(*args, **kwargs)
+
+        return wrapped_function
+
+    return wrapper
+
+
+def candidate_required():
+    def wrapper(fn):
+        @wraps(fn)
+        def wrapped_function(*args, **kwargs):
+            check_user(role='candidate')
             return fn(*args, **kwargs)
 
         return wrapped_function
