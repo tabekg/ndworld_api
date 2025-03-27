@@ -32,6 +32,11 @@ class User(Base):
     photo_path = Column(String(255), nullable=True)
     photo_id = Column(Integer, nullable=True)
 
+    front_passport_id = Column(Integer, nullable=True)
+    back_passport_id = Column(Integer, nullable=True)
+    front_passport_path = Column(String(255), nullable=True)
+    back_passport_path = Column(String(255), nullable=True)
+
     # role = Column(Enum(UserRoleEnum), nullable=True)
     payload = Column(mutable_json_type(dbtype=JSONB, nested=True), nullable=True)
     is_disabled = Column(Boolean, default=False, nullable=False)
@@ -46,11 +51,12 @@ class User(Base):
     def to_dict_item(self):
         return orm_to_dict(self, [
             'first_name', 'last_name',
+            'summary',
             'contact_email', 'contact_phone_number',
+            'marital_status',
             'birth_date', 'about',
-            'payload', 'is_disabled',
-            'marital_status', 'summary',
             'photo_path',
+            'payload', 'is_disabled',
             'created_at',
         ], additional_fields={
             'experiences': lambda a: orm_to_dict(a.experiences),

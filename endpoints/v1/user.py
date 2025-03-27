@@ -45,6 +45,52 @@ def index_post():
     return make_response(g.user.to_dict_item())
 
 
+@bp.get('/passport')
+@auth_required()
+def passport_get():
+    return make_response({
+        'front_passport_path': g.user.front_passport_path,
+        'back_passport_path': g.user.back_passport_path,
+    })
+
+
+@bp.post('/passport')
+@auth_required()
+def passport_post():
+    data = request.json
+    front_passport_id = data.get('front_passport_id', g.user.front_passport_id)
+    back_passport_id = data.get('back_passport_id', g.user.back_passport_id)
+
+    if front_passport_id != g.user.front_passport_id:
+        if g.user.front_passport_id is not None:
+            unlink_image(g.user.front_passport_id, f'user_front_passport_{g.user.id}')
+        if front_passport_id is not None:
+            res = link_image(front_passport_id, f'user_front_passport_{g.user.id}')
+            g.user.front_passport_id = front_passport_id
+            g.user.front_passport_path = res['path']
+        else:
+            g.user.front_passport_id = None
+            g.user.front_passport_path = None
+
+    if back_passport_id != g.user.back_passport_id:
+        if g.user.back_passport_id is not None:
+            unlink_image(g.user.back_passport_id, f'user_back_passport_{g.user.id}')
+        if back_passport_id is not None:
+            res = link_image(back_passport_id, f'user_back_passport_{g.user.id}')
+            g.user.back_passport_id = back_passport_id
+            g.user.back_passport_path = res['path']
+        else:
+            g.user.back_passport_id = None
+            g.user.back_passport_path = None
+
+    g.db.commit()
+
+    return make_response({
+        'front_passport_path': g.user.front_passport_path,
+        'back_passport_path': g.user.back_passport_path,
+    })
+
+
 @bp.get('/skill')
 @auth_required()
 def skill_get():
