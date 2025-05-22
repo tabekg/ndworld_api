@@ -26,8 +26,8 @@ class Company(Base):
     payload = Column(mutable_json_type(dbtype=JSONB, nested=True), nullable=True)
     is_disabled = Column(Boolean, default=False, nullable=False)
 
-    branches = relationship("Branch", back_populates="companies", cascade="all, delete-orphan")
-    roles = relationship("UserRole", back_populates="company", cascade="all, delete-orphan")
+    branches = relationship("Branch", back_populates="company", passive_deletes=True)
+    roles = relationship("Role", back_populates="company", passive_deletes=True)
 
     def to_dict_item(self):
         return orm_to_dict(self, [
@@ -40,14 +40,15 @@ class Company(Base):
 class Branch(Base):
     __tablename__ = 'branches'
 
+    company_id = Column(Integer, ForeignKey('companies.id', ondelete='CASCADE'), nullable=False)
+
     address = Column(String(255), nullable=False)
 
     payload = Column(mutable_json_type(dbtype=JSONB, nested=True), nullable=True)
     is_disabled = Column(Boolean, default=False, nullable=False)
-    company_id = Column(Integer, ForeignKey('companies.id'), nullable=False)
 
-    company = relationship("Company", back_populates="branches")
-    roles = relationship("UserRole", back_populates="branch", cascade="all, delete-orphan")
+    company = relationship("Company", back_populates="branches", passive_deletes=True)
+    roles = relationship("Role", back_populates="branch", passive_deletes=True)
 
     def to_dict_item(self):
         return orm_to_dict(self, [

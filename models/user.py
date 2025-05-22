@@ -1,19 +1,10 @@
-from sqlalchemy import String, Column, Boolean, Integer, ForeignKey
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy import String, Column, Boolean, Integer, ForeignKey, VARCHAR
+from sqlalchemy.dialects.postgresql import JSONB, ARRAY
 from sqlalchemy.orm import relationship
 from sqlalchemy_json import mutable_json_type
 
 from utils.database import Base
 from utils.http import orm_to_dict
-
-
-USER_ROLE_LEVELS = {
-    0: 'REGULAR',
-    10: 'REPORTER',
-    30: 'MANAGER',
-    50: 'ADMIN',
-    100: 'SUPER_ADMIN',
-}
 
 
 class User(Base):
@@ -26,11 +17,10 @@ class User(Base):
     payload = Column(mutable_json_type(dbtype=JSONB, nested=True), nullable=True)
     is_disabled = Column(Boolean, default=False, nullable=False)
 
-    resume = relationship("Resume", back_populates="user", uselist=False)
-
-    roles = relationship("UserRole", back_populates="user", cascade="all, delete-orphan")
-    auth_providers = relationship("AuthProvider", back_populates="user", cascade="all, delete-orphan")
-    auth_sessions = relationship("AuthSession", back_populates="user", cascade="all, delete-orphan")
+    resume = relationship("Resume", back_populates="user", uselist=False, passive_deletes=True)
+    roles = relationship("Role", back_populates="user", passive_deletes=True)
+    auth_providers = relationship("AuthProvider", back_populates="user", passive_deletes=True)
+    auth_sessions = relationship("AuthSession", back_populates="user", passive_deletes=True)
 
     def to_dict_item(self):
         return orm_to_dict(self, [
@@ -42,18 +32,20 @@ class User(Base):
         })
 
 
-class UserRole(Base):
-    __tablename__ = 'user_roles'
+class Role(Base):
+    __tablename__ = 'roles'
 
-    level = Column(Integer, nullable=False, default=1, server_default='1')
+    permissions = Column(ARRAY(VARCHAR(255)), nullable=False, default=list, server_default='{}')
 
-    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-    company_id = Column(Integer, ForeignKey('companies.id'), nullable=True)
-    branch_id = Column(Integer, ForeignKey('companies.id'), nullable=True)
+    user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
+    company_id = Column(Integer, ForeignKey('companies.id', ondelete='CASCADE'), nullable=True)
+    branch_id = Column(Integer, ForeignKey('branches.id', ondelete='CASCADE'), nullable=True)
 
-    user = relationship("User", back_populates="roles")
-    company = relationship("Company", back_populates="roles")
-    branch = relationship("Branch", back_populates="roles")
+    payload = Column(mutable_json_type(dbtype=JSONB, nested=True), nullable=True)
+
+    user = relationship("User", back_populates="roles", passive_deletes=True)
+    company = relationship("Company", back_populates="roles", passive_deletes=True)
+    branch = relationship("Branch", back_populates="roles", passive_deletes=True)
 
     def to_dict_item(self):
         return orm_to_dict(self, [
