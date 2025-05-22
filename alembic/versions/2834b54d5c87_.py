@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: e9dccb33182a
+Revision ID: 2834b54d5c87
 Revises: 
-Create Date: 2025-05-22 12:42:51.371826
+Create Date: 2025-05-22 15:48:03.133361
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = 'e9dccb33182a'
+revision: str = '2834b54d5c87'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -77,11 +77,27 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_branches_id'), 'branches', ['id'], unique=False)
+    op.create_table('job_postings',
+    sa.Column('company_id', sa.Integer(), nullable=False),
+    sa.Column('title', sa.String(length=255), nullable=False),
+    sa.Column('description', sa.Text(), nullable=True),
+    sa.Column('location', sa.String(length=255), nullable=True),
+    sa.Column('status', sa.Enum('draft', 'published', 'closed', 'archived', name='jobpostingstatusenum'), nullable=False),
+    sa.Column('payload', postgresql.JSONB(astext_type=sa.Text()), nullable=True),
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('created_at', sa.DateTime(), nullable=False),
+    sa.Column('updated_at', sa.DateTime(), nullable=False),
+    sa.ForeignKeyConstraint(['company_id'], ['companies.id'], ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_job_postings_id'), 'job_postings', ['id'], unique=False)
     op.create_table('resumes',
-    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('company_id', sa.Integer(), nullable=False),
+    sa.Column('status', sa.Enum('draft', 'available', 'archived', 'unavailable', name='resumestatusenum'), nullable=False),
     sa.Column('summary', sa.Text(), nullable=True),
     sa.Column('contact_email', sa.String(length=255), nullable=True),
     sa.Column('contact_phone_number', sa.String(length=255), nullable=True),
+    sa.Column('contact_whatsapp', sa.String(length=255), nullable=True),
     sa.Column('marital_status', sa.String(length=255), nullable=True),
     sa.Column('birth_date', sa.Date(), nullable=True),
     sa.Column('about', sa.Text(), nullable=True),
@@ -94,10 +110,26 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('updated_at', sa.DateTime(), nullable=False),
-    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['company_id'], ['companies.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_resumes_id'), 'resumes', ['id'], unique=False)
+    op.create_table('job_offers',
+    sa.Column('company_id', sa.Integer(), nullable=False),
+    sa.Column('job_posting_id', sa.Integer(), nullable=False),
+    sa.Column('status', sa.Enum('pending', 'viewed', 'closed', 'withdrawn', 'expired', name='jobofferstatusenum'), server_default='pending', nullable=False),
+    sa.Column('sent_at', sa.DateTime(), server_default=sa.text('now()'), nullable=False),
+    sa.Column('reviewed_at', sa.DateTime(), nullable=True),
+    sa.Column('closed_at', sa.DateTime(), nullable=True),
+    sa.Column('message', sa.Text(), nullable=True),
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('created_at', sa.DateTime(), nullable=False),
+    sa.Column('updated_at', sa.DateTime(), nullable=False),
+    sa.ForeignKeyConstraint(['company_id'], ['companies.id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['job_posting_id'], ['job_postings.id'], ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_job_offers_id'), 'job_offers', ['id'], unique=False)
     op.create_table('resume_educations',
     sa.Column('resume_id', sa.Integer(), nullable=False),
     sa.Column('institution', sa.String(length=255), nullable=False),
@@ -138,7 +170,7 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_resume_skills_id'), 'resume_skills', ['id'], unique=False)
     op.create_table('roles',
-    sa.Column('level', sa.Integer(), server_default='1', nullable=False),
+    sa.Column('permissions', postgresql.ARRAY(sa.VARCHAR(length=255)), server_default='{}', nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('company_id', sa.Integer(), nullable=True),
     sa.Column('branch_id', sa.Integer(), nullable=True),
@@ -171,12 +203,42 @@ def upgrade() -> None:
     sa.UniqueConstraint('hash')
     )
     op.create_index(op.f('ix_auth_sessions_id'), 'auth_sessions', ['id'], unique=False)
+    op.create_table('job_offer_resumes',
+    sa.Column('job_offer_id', sa.Integer(), nullable=False),
+    sa.Column('resume_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['job_offer_id'], ['job_offers.id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['resume_id'], ['resumes.id'], ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('job_offer_id', 'resume_id')
+    )
+    op.create_table('workers',
+    sa.Column('agent_id', sa.Integer(), nullable=False),
+    sa.Column('company_id', sa.Integer(), nullable=False),
+    sa.Column('resume_id', sa.Integer(), nullable=False),
+    sa.Column('job_posting_id', sa.Integer(), nullable=False),
+    sa.Column('job_offer_id', sa.Integer(), nullable=False),
+    sa.Column('status', sa.Enum('pending', 'hired', 'rejected', 'active', 'terminated', name='workerstatusenum'), nullable=False),
+    sa.Column('hired_at', sa.DateTime(), nullable=True),
+    sa.Column('comment', sa.Text(), nullable=True),
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('created_at', sa.DateTime(), nullable=False),
+    sa.Column('updated_at', sa.DateTime(), nullable=False),
+    sa.ForeignKeyConstraint(['agent_id'], ['companies.id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['company_id'], ['companies.id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['job_offer_id'], ['job_offers.id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['job_posting_id'], ['job_postings.id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['resume_id'], ['resumes.id'], ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_workers_id'), 'workers', ['id'], unique=False)
     # ### end Alembic commands ###
 
 
 def downgrade() -> None:
     """Downgrade schema."""
     # ### commands auto generated by Alembic - please adjust! ###
+    op.drop_index(op.f('ix_workers_id'), table_name='workers')
+    op.drop_table('workers')
+    op.drop_table('job_offer_resumes')
     op.drop_index(op.f('ix_auth_sessions_id'), table_name='auth_sessions')
     op.drop_table('auth_sessions')
     op.drop_index(op.f('ix_roles_id'), table_name='roles')
@@ -187,8 +249,12 @@ def downgrade() -> None:
     op.drop_table('resume_experiences')
     op.drop_index(op.f('ix_resume_educations_id'), table_name='resume_educations')
     op.drop_table('resume_educations')
+    op.drop_index(op.f('ix_job_offers_id'), table_name='job_offers')
+    op.drop_table('job_offers')
     op.drop_index(op.f('ix_resumes_id'), table_name='resumes')
     op.drop_table('resumes')
+    op.drop_index(op.f('ix_job_postings_id'), table_name='job_postings')
+    op.drop_table('job_postings')
     op.drop_index(op.f('ix_branches_id'), table_name='branches')
     op.drop_table('branches')
     op.drop_index(op.f('ix_auth_providers_id'), table_name='auth_providers')

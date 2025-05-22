@@ -1,25 +1,37 @@
-from sqlalchemy import String, Column, Text, Date, Integer, ForeignKey
+import enum
+
+from sqlalchemy import String, Column, Text, Date, Integer, ForeignKey, Enum
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
 
+from models.common import job_offer_resumes
 from utils.database import Base
 from utils.http import orm_to_dict
+
+
+class ResumeStatusEnum(str, enum.Enum):
+    draft = 'DRAFT'
+    available = 'AVAILABLE'
+    archived = 'ARCHIVED'
+    unavailable = 'UNAVAILABLE'
 
 
 class Resume(Base):
     __tablename__ = 'resumes'
 
-    user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
+    company_id = Column(Integer, ForeignKey('companies.id', ondelete='CASCADE'), nullable=False)
 
+    status = Column(Enum(ResumeStatusEnum), nullable=False)
     summary = Column(Text, nullable=True)
     contact_email = Column(String(255), nullable=True)
     contact_phone_number = Column(String(255), nullable=True)
+    contact_whatsapp = Column(String(255), nullable=True)
     marital_status = Column(String(255), nullable=True)
     birth_date = Column(Date, nullable=True)
     about = Column(Text, nullable=True)
 
     photo_path = Column(String(255), nullable=True)
     photo_id = Column(Integer, nullable=True)
-
     front_passport_id = Column(Integer, nullable=True)
     back_passport_id = Column(Integer, nullable=True)
     front_passport_path = Column(String(255), nullable=True)
@@ -29,7 +41,17 @@ class Resume(Base):
     educations = relationship("ResumeEducation", back_populates="resume", passive_deletes=True)
     skills = relationship("ResumeSkill", back_populates="resume", passive_deletes=True)
 
-    user = relationship("User", back_populates="resume", passive_deletes=True)
+    company = relationship("Company", back_populates="resumes")
+    job_offers = relationship("JobOffer", secondary=job_offer_resumes, back_populates="resumes")
+    workers = relationship("Worker", back_populates="resume", passive_deletes=True)
+
+    @hybrid_property
+    def is_active(self):
+        return self.status == ResumeStatusEnum.available
+
+    @is_active.expression
+    def is_active(cls):
+        return cls.status == ResumeStatusEnum.available
 
     def to_dict_item(self):
         return orm_to_dict(self, [

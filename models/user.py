@@ -13,7 +13,6 @@ class User(Base):
     first_name = Column(String(255), nullable=True)
     last_name = Column(String(255), nullable=True)
 
-    # role = Column(Enum(UserRoleEnum), nullable=True)
     payload = Column(mutable_json_type(dbtype=JSONB, nested=True), nullable=True)
     is_disabled = Column(Boolean, default=False, nullable=False)
 

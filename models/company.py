@@ -14,9 +14,6 @@ class CompanyTypeEnum(str, enum.Enum):
     recruitment = 'RECRUITMENT'
 
 
-AVAILABLE_COMPANY_TYPES = [CompanyTypeEnum.employer, CompanyTypeEnum.recruitment]
-
-
 class Company(Base):
     __tablename__ = 'companies'
 
@@ -28,6 +25,8 @@ class Company(Base):
 
     branches = relationship("Branch", back_populates="company", passive_deletes=True)
     roles = relationship("Role", back_populates="company", passive_deletes=True)
+    job_postings = relationship("JobPosting", back_populates="company", passive_deletes=True)
+    job_offers = relationship("JobOffer", back_populates="company", passive_deletes=True)
 
     def to_dict_item(self):
         return orm_to_dict(self, [
