@@ -7,7 +7,7 @@ from utils.database import Base
 from utils.http import orm_to_dict
 
 
-USER_ROLE_LEVELS = {
+ROLE_LEVELS = {
     0: 'REGULAR',
     10: 'REPORTER',
     30: 'MANAGER',
@@ -26,11 +26,10 @@ class User(Base):
     payload = Column(mutable_json_type(dbtype=JSONB, nested=True), nullable=True)
     is_disabled = Column(Boolean, default=False, nullable=False)
 
-    resume = relationship("Resume", back_populates="user", uselist=False)
-
-    roles = relationship("UserRole", back_populates="user", cascade="all, delete-orphan")
-    auth_providers = relationship("AuthProvider", back_populates="user", cascade="all, delete-orphan")
-    auth_sessions = relationship("AuthSession", back_populates="user", cascade="all, delete-orphan")
+    resume = relationship("Resume", back_populates="user", uselist=False, passive_deletes=True)
+    roles = relationship("Role", back_populates="user", passive_deletes=True)
+    auth_providers = relationship("AuthProvider", back_populates="user", passive_deletes=True)
+    auth_sessions = relationship("AuthSession", back_populates="user", passive_deletes=True)
 
     def to_dict_item(self):
         return orm_to_dict(self, [
@@ -42,18 +41,19 @@ class User(Base):
         })
 
 
-class UserRole(Base):
-    __tablename__ = 'user_roles'
+class Role(Base):
+    __tablename__ = 'roles'
 
     level = Column(Integer, nullable=False, default=1, server_default='1')
 
-    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-    company_id = Column(Integer, ForeignKey('companies.id'), nullable=True)
-    branch_id = Column(Integer, ForeignKey('companies.id'), nullable=True)
+    user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
+    company_id = Column(Integer, ForeignKey('companies.id', ondelete='CASCADE'), nullable=True)
+    branch_id = Column(Integer, ForeignKey('branches.id', ondelete='CASCADE'), nullable=True)
+    payload = Column(mutable_json_type(dbtype=JSONB, nested=True), nullable=True)
 
-    user = relationship("User", back_populates="roles")
-    company = relationship("Company", back_populates="roles")
-    branch = relationship("Branch", back_populates="roles")
+    user = relationship("User", back_populates="roles", passive_deletes=True)
+    company = relationship("Company", back_populates="roles", passive_deletes=True)
+    branch = relationship("Branch", back_populates="roles", passive_deletes=True)
 
     def to_dict_item(self):
         return orm_to_dict(self, [

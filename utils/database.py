@@ -8,11 +8,11 @@ engine = create_engine(DB_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
-class BaseModel(object):
+class BaseModel:
     id = Column(Integer, primary_key=True, index=True)
 
     created_at = Column(DateTime, default=func.now(), nullable=False)
-    updated_at = Column(DateTime, default=None)
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now(), nullable=False)
 
 
 Base = declarative_base(cls=BaseModel)
