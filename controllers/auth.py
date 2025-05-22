@@ -52,13 +52,7 @@ def check_user(role=None):
     if not hasattr(g, 'user') or not g.user:
         raise ResponseException(payload='User not authorized', status='not_authorized', status_code=401)
     if role is not None:
-        if role == 'candidate':
-            g.candidate = g.user.candidate
-
-            if not g.candidate:
-                raise ResponseException(payload='The user has no permission', status='access_denied', status_code=403)
-        else:
-            raise ResponseException(payload='The user has no permission', status='access_denied', status_code=403)
+        raise ResponseException(payload='The user has no permission', status='access_denied', status_code=403)
 
 
 def auth_required(role=None):
@@ -66,18 +60,6 @@ def auth_required(role=None):
         @wraps(fn)
         def wrapped_function(*args, **kwargs):
             check_user(role=role)
-            return fn(*args, **kwargs)
-
-        return wrapped_function
-
-    return wrapper
-
-
-def candidate_required():
-    def wrapper(fn):
-        @wraps(fn)
-        def wrapped_function(*args, **kwargs):
-            check_user(role='candidate')
             return fn(*args, **kwargs)
 
         return wrapped_function

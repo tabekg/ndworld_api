@@ -5,8 +5,8 @@ from utils.database import Base
 from utils.http import orm_to_dict
 
 
-class Candidate(Base):
-    __tablename__ = 'candidates'
+class Resume(Base):
+    __tablename__ = 'resumes'
 
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
 
@@ -25,11 +25,11 @@ class Candidate(Base):
     front_passport_path = Column(String(255), nullable=True)
     back_passport_path = Column(String(255), nullable=True)
 
-    experiences = relationship("CandidateExperience", back_populates="candidate", cascade="all, delete-orphan")
-    educations = relationship("CandidateEducation", back_populates="candidate", cascade="all, delete-orphan")
-    skills = relationship("CandidateSkill", back_populates="candidate", cascade="all, delete-orphan")
+    experiences = relationship("ResumeExperience", back_populates="resume", cascade="all, delete-orphan")
+    educations = relationship("ResumeEducation", back_populates="resume", cascade="all, delete-orphan")
+    skills = relationship("ResumeSkill", back_populates="resume", cascade="all, delete-orphan")
 
-    user = relationship("User", back_populates="candidate")
+    user = relationship("User", back_populates="resume")
 
     def to_dict_item(self):
         return orm_to_dict(self, [
@@ -45,17 +45,17 @@ class Candidate(Base):
         })
 
 
-class CandidateExperience(Base):
-    __tablename__ = 'candidate_experiences'
+class ResumeExperience(Base):
+    __tablename__ = 'resume_experiences'
 
-    candidate_id = Column(Integer, ForeignKey('candidates.id'), nullable=False)
+    resume_id = Column(Integer, ForeignKey('resumes.id'), nullable=False)
     company = Column(String(255), nullable=False)
     position = Column(String(255), nullable=False)
     start_date = Column(Date, nullable=False)
     end_date = Column(Date, nullable=True)  # Может быть пустым, если человек все еще работает
     description = Column(Text, nullable=True)
 
-    candidate = relationship("Candidate", back_populates="experiences")
+    resume = relationship("Resume", back_populates="experiences")
 
     def to_dict_item(self):
         return orm_to_dict(self, ['company', 'position', 'start_date', 'end_date', 'description', 'created_at'])
@@ -64,17 +64,17 @@ class CandidateExperience(Base):
         return orm_to_dict(self, ['company', 'position', 'start_date', 'end_date', 'description', 'created_at'])
 
 
-class CandidateEducation(Base):
-    __tablename__ = 'candidate_educations'
+class ResumeEducation(Base):
+    __tablename__ = 'resume_educations'
 
-    candidate_id = Column(Integer, ForeignKey('candidates.id'), nullable=False)
+    resume_id = Column(Integer, ForeignKey('resumes.id'), nullable=False)
     institution = Column(String(255), nullable=False)
     degree = Column(String(255), nullable=False)
     start_date = Column(Date, nullable=False)
     end_date = Column(Date, nullable=True)
     description = Column(Text, nullable=True)
 
-    candidate = relationship("Candidate", back_populates="educations")
+    resume = relationship("Resume", back_populates="educations")
 
     def to_dict_item(self):
         return orm_to_dict(self, ['institution', 'degree', 'start_date', 'end_date', 'description', 'created_at'])
@@ -83,14 +83,14 @@ class CandidateEducation(Base):
         return orm_to_dict(self, ['institution', 'degree', 'start_date', 'end_date', 'description', 'created_at'])
 
 
-class CandidateSkill(Base):
-    __tablename__ = 'candidate_skills'
+class ResumeSkill(Base):
+    __tablename__ = 'resume_skills'
 
-    candidate_id = Column(Integer, ForeignKey('candidates.id'), nullable=False)
+    resume_id = Column(Integer, ForeignKey('resumes.id'), nullable=False)
     skill_name = Column(String(100), nullable=False)
     proficiency = Column(String(50), nullable=True)  # Beginner, Intermediate, Advanced
 
-    candidate = relationship("Candidate", back_populates="skills")
+    resume = relationship("Resume", back_populates="skills")
 
     def to_dict_item(self):
         return orm_to_dict(self, ['skill_name', 'proficiency', 'created_at'])

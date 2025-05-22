@@ -17,7 +17,7 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 def before_request():
     g.db = SessionLocal()
     g.user = None
-    g.candidate = None
+    g.resume = None
 
 
 @app.after_request

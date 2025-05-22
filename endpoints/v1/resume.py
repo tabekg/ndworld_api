@@ -1,28 +1,28 @@
 from flask import Blueprint, g, request
 
-from controllers.auth import candidate_required
-from models.candidate import CandidateSkill, CandidateEducation, CandidateExperience
+from controllers.auth import auth_required
+from models.resume import ResumeSkill, ResumeEducation, ResumeExperience
 from utils.http import make_response, orm_to_dict
 from utils.image import link_image, unlink_image
 
-bp = Blueprint('candidate', __name__, url_prefix='/candidate')
+bp = Blueprint('resume', __name__, url_prefix='/resume')
 
 
 @bp.before_request
-@candidate_required()
+@auth_required()
 def before_request():
     pass
 
 
 @bp.get('')
 def index_get():
-    return make_response(g.candidate.to_dict_item())
+    return make_response(g.resume.to_dict_item())
 
 
 @bp.post('')
 def index_post():
     data = request.json
-    photo_id = data.get('photo_id', g.candidate.photo_id)
+    photo_id = data.get('photo_id', g.resume.photo_id)
 
     if photo_id != g.candidate.photo_id:
         if g.candidate.photo_id is not None:
@@ -101,13 +101,13 @@ def skill_post():
     id_ = data.get('id') or None
 
     if id_ is not None and id_:
-        item = g.db.query(CandidateSkill).filter(CandidateSkill.candidate_id == g.candidate.id, CandidateSkill.id == id_).one()
+        item = g.db.query(ResumeSkill).filter(ResumeSkill.resume_id == g.candidate.id, ResumeSkill.id == id_).one()
     else:
-        item = CandidateSkill(candidate_id=g.candidate.id)
+        item = ResumeSkill(resume_id=g.candidate.id)
         assert data['skill_name']
-        assert g.db.query(CandidateSkill).filter(
-            CandidateSkill.candidate_id == g.candidate.id,
-            CandidateSkill.skill_name == data['skill_name'],
+        assert g.db.query(ResumeSkill).filter(
+            ResumeSkill.resume_id == g.candidate.id,
+            ResumeSkill.skill_name == data['skill_name'],
         ).first() is None
         g.db.add(item)
 
@@ -130,14 +130,14 @@ def education_post():
     id_ = data.get('id') or None
 
     if id_ is not None and id_:
-        item = g.db.query(CandidateEducation).filter(CandidateEducation.candidate_id == g.candidate.id, CandidateEducation.id == id_).one()
+        item = g.db.query(ResumeEducation).filter(ResumeEducation.resume_id == g.candidate.id, ResumeEducation.id == id_).one()
     else:
-        item = CandidateEducation(candidate_id=g.candidate.id)
+        item = ResumeEducation(resume_id=g.candidate.id)
         assert data['institution'] and data['degree'] and data['start_date']
-        assert g.db.query(CandidateEducation).filter(
-            CandidateEducation.candidate_id == g.candidate.id,
-            CandidateEducation.institution == data['institution'],
-            CandidateEducation.degree == data['degree'],
+        assert g.db.query(ResumeEducation).filter(
+            ResumeEducation.resume_id == g.candidate.id,
+            ResumeEducation.institution == data['institution'],
+            ResumeEducation.degree == data['degree'],
         ).first() is None
 
         g.db.add(item)
@@ -164,14 +164,14 @@ def experience_post():
     id_ = data.get('id') or None
 
     if id_ is not None and id_:
-        item = g.db.query(CandidateExperience).filter(CandidateExperience.candidate_id == g.candidate.id, CandidateExperience.id == id_).one()
+        item = g.db.query(ResumeExperience).filter(ResumeExperience.resume_id == g.candidate.id, ResumeExperience.id == id_).one()
     else:
-        item = CandidateExperience(candidate_id=g.candidate.id)
+        item = ResumeExperience(resume_id=g.candidate.id)
         assert data['company'] and data['position'] and data['start_date']
-        assert g.db.query(CandidateExperience).filter(
-            CandidateExperience.candidate_id == g.candidate.id,
-            CandidateExperience.company == data['company'],
-            CandidateExperience.position == data['position'],
+        assert g.db.query(ResumeExperience).filter(
+            ResumeExperience.resume_id == g.resume.id,
+            ResumeExperience.company == data['company'],
+            ResumeExperience.position == data['position'],
         ).first() is None
 
         g.db.add(item)
