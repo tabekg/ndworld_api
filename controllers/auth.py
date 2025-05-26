@@ -67,7 +67,7 @@ def auth_required(role=None):
     return wrapper
 
 
-def create_auth_session(user_id: int, fcm_token=None):
+def create_auth_session(db, user_id: int, fcm_token=None):
     session = AuthSession(user_id=user_id)
 
     session.hash = uuid.uuid4().hex
@@ -76,14 +76,21 @@ def create_auth_session(user_id: int, fcm_token=None):
     session.user_agent = request.headers.get('User-Agent')
     session.expired_at = datetime.now(tz=timezone.utc) + timedelta(days=ACCESS_TOKEN_EXPIRE_DAYS)
     session.is_active = True
+    session.last_action_at = datetime.now(tz=timezone.utc)
+
+    db.add(session)
+    db.flush()
 
     return session
 
 
-def create_auth_provider(user_id: int, name: str, identity: str):
+def create_auth_provider(db, user_id: int, name: str, identifier: str):
     provider = AuthProvider(user_id=user_id)
 
     provider.name = name
-    provider.identity = identity or None
+    provider.identifier = identifier or None
+
+    g.db.add(provider)
+    g.db.flush()
 
     return provider

@@ -24,6 +24,9 @@ class Company(Base):
     is_disabled = Column(Boolean, default=False, nullable=False)
 
     branches = relationship("Branch", back_populates="company", passive_deletes=True)
+    resumes = relationship("Resume", back_populates="company", passive_deletes=True)
+    offers = relationship("JobOffer", back_populates="company", passive_deletes=True)
+    workers = relationship("Worker", back_populates="company", passive_deletes=True, foreign_keys='Worker.company_id')
     roles = relationship("Role", back_populates="company", passive_deletes=True)
     job_postings = relationship("JobPosting", back_populates="company", passive_deletes=True)
     job_offers = relationship("JobOffer", back_populates="company", passive_deletes=True)

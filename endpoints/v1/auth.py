@@ -63,21 +63,16 @@ def verify_otp_post():
     if status == 'success':
         auth_provider = g.db.query(AuthProvider).filter(
             AuthProvider.name == 'whatsapp',
-            AuthProvider.identity == payload['phone_number'],
+            AuthProvider.identifier == payload['phone_number'],
         ).first()
 
         if auth_provider is None:
             user = create_user(g.db)
-
-            auth_provider = create_auth_provider(user.id, 'whatsapp', payload['phone_number'])
-            g.db.add(auth_provider)
-            g.db.flush()
+            auth_provider = create_auth_provider(g.db, user.id, 'whatsapp', payload['phone_number'])
         else:
             user = auth_provider.user
 
-        auth_session = create_auth_session(user.id)
-        g.db.add(auth_session)
-        g.db.flush()
+        auth_session = create_auth_session(g.db, user.id)
 
         g.db.commit()
 

@@ -16,7 +16,6 @@ class User(Base):
     payload = Column(mutable_json_type(dbtype=JSONB, nested=True), nullable=True)
     is_disabled = Column(Boolean, default=False, nullable=False)
 
-    resume = relationship("Resume", back_populates="user", uselist=False, passive_deletes=True)
     roles = relationship("Role", back_populates="user", passive_deletes=True)
     auth_providers = relationship("AuthProvider", back_populates="user", passive_deletes=True)
     auth_sessions = relationship("AuthSession", back_populates="user", passive_deletes=True)
@@ -26,8 +25,11 @@ class User(Base):
             'first_name', 'last_name',
             'payload', 'is_disabled',
             'created_at',
-        ], additional_fields={
-            'resume': lambda a: a.resume.to_dict_item() if a.resume else None,
+        ], {
+            'roles': lambda a: orm_to_dict(a.roles, [], {
+                'company': lambda b: orm_to_dict(b.company, ['title']) if b.company else None,
+                'branch': lambda b: orm_to_dict(b.branch, ['address']) if b.branch else None,
+            }),
         })
 
 

@@ -54,6 +54,6 @@ class JobOffer(Base):
     message = Column(Text, nullable=True)
 
     resumes = relationship("Resume", secondary=job_offer_resumes, back_populates="job_offers")
-    company = relationship("Company", back_populates="offers", passive_deletes=True)
-    job_posting = relationship("JobPosting", back_populates="offers", passive_deletes=True)
+    company = relationship("Company", back_populates="job_offers", passive_deletes=True)
+    job_posting = relationship("JobPosting", back_populates="job_offers", passive_deletes=True)
     workers = relationship("Worker", back_populates="job_offer", passive_deletes=True)
