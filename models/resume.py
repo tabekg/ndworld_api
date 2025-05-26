@@ -21,6 +21,9 @@ class Resume(Base):
 
     company_id = Column(Integer, ForeignKey('companies.id', ondelete='CASCADE'), nullable=False)
 
+    first_name = Column(String(255), nullable=True)
+    last_name = Column(String(255), nullable=True)
+
     status = Column(Enum(ResumeStatusEnum), nullable=False)
     summary = Column(Text, nullable=True)
     contact_email = Column(String(255), nullable=True)

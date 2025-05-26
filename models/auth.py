@@ -38,6 +38,7 @@ class AuthSession(Base):
     last_action_at = Column(DateTime, default=func.now(), nullable=False)
 
     user = relationship("User", back_populates="auth_sessions", passive_deletes=True)
+    role = relationship("Role", back_populates="auth_sessions", passive_deletes=True)
 
     def to_dict_item(self):
         return orm_to_dict(self, ['expired_at', 'is_active', 'created_at', 'last_action_at'])

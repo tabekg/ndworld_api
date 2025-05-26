@@ -1,9 +1,10 @@
 import requests
 from flask import Blueprint, request, g
 
-from controllers.auth import create_access_token, create_auth_session, create_auth_provider
+from controllers.auth import create_access_token, create_auth_session, create_auth_provider, auth_required
 from controllers.user import create_user
 from models.auth import AuthProvider
+from models.user import Role
 from utils.config import config
 from utils.exception import ResponseException
 from utils.http import make_response
@@ -72,7 +73,12 @@ def verify_otp_post():
         else:
             user = auth_provider.user
 
-        auth_session = create_auth_session(g.db, user.id)
+        role_id = None
+
+        if len(user.roles) > 0:
+            role_id = user.roles[0].id
+
+        auth_session = create_auth_session(g.db, user_id=user.id, role_id=role_id)
 
         g.db.commit()
 
@@ -92,3 +98,16 @@ def verify_otp_post():
         status=status,
         status_code=response.status_code,
     )
+
+
+@bp.post('/role')
+@auth_required()
+def role_post():
+    role_id = request.json['role_id']
+
+    role = g.db.query(Role).filter(Role.id == role_id, Role.user_id == g.user.id).one()
+
+    g.auth_session.role_id = role.id
+    g.db.commit()
+
+    return make_response()

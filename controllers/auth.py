@@ -7,7 +7,7 @@ import jwt
 from flask import request, g
 
 from models.auth import AuthSession, AuthProvider
-from models.user import User
+from models.user import User, Role
 from utils.config import ACCESS_TOKEN_EXPIRE_DAYS, SECRET_KEY
 from utils.exception import ResponseException
 
@@ -41,6 +41,9 @@ def check_auth_token():
             g.user = g.db.query(User) \
                 .filter(User.id == g.auth_session.user_id, User.is_disabled.isnot(True)) \
                 .first()
+            g.role = g.auth_session.role if g.user else None
+            g.company = g.role.company if g.role else None
+            g.branch = g.role.branch if g.role else None
     except Exception as e:
         raise ResponseException(payload=str(e), status='token_is_invalid', status_code=401)
 
@@ -67,8 +70,11 @@ def auth_required(role=None):
     return wrapper
 
 
-def create_auth_session(db, user_id: int, fcm_token=None):
-    session = AuthSession(user_id=user_id)
+def create_auth_session(db, user_id: int, role_id: int=None, fcm_token=None):
+    if role_id:
+        assert db.query(Role).filter(Role.id == role_id, Role.user_id == user_id).one()
+
+    session = AuthSession(user_id=user_id, role_id=role_id)
 
     session.hash = uuid.uuid4().hex
     session.fcm_token = fcm_token or None
