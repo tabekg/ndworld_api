@@ -15,13 +15,13 @@ class Role(Base):
 
     user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
     company_id = Column(Integer, ForeignKey('companies.id', ondelete='CASCADE'), nullable=True)
-    branch_id = Column(Integer, ForeignKey('branches.id', ondelete='CASCADE'), nullable=True)
+    agency_id = Column(Integer, ForeignKey('agencies.id', ondelete='CASCADE'), nullable=True)
 
     payload = Column(mutable_json_type(dbtype=JSONB, nested=True), nullable=True)
 
     user = relationship("User", back_populates="roles", passive_deletes=True)
     company = relationship("Company", back_populates="roles", passive_deletes=True)
-    branch = relationship("Branch", back_populates="roles", passive_deletes=True)
+    agency = relationship("Agency", back_populates="roles", passive_deletes=True)
     auth_sessions = relationship("AuthSession", back_populates="role", passive_deletes=True)
 
     def to_dict_item(self):
@@ -33,8 +33,8 @@ class Role(Base):
 class User(Base):
     __tablename__ = 'users'
 
-    first_name = Column(String(255), nullable=True)
-    last_name = Column(String(255), nullable=True)
+    name = Column(String(255), nullable=True)
+    surname = Column(String(255), nullable=True)
 
     payload = Column(mutable_json_type(dbtype=JSONB, nested=True), nullable=True)
     is_disabled = Column(Boolean, default=False, nullable=False)
@@ -45,12 +45,12 @@ class User(Base):
 
     def to_dict_item(self):
         return orm_to_dict(self, [
-            'first_name', 'last_name',
+            'name', 'surname',
             'payload', 'is_disabled',
             'created_at',
         ], {
             'roles': lambda a: orm_to_dict(a.roles, [], {
                 'company': lambda b: orm_to_dict(b.company, ['title']) if b.company else None,
-                'branch': lambda b: orm_to_dict(b.branch, ['address']) if b.branch else None,
+                'agency': lambda b: orm_to_dict(b.agency, ['title']) if b.agency else None,
             }),
         })

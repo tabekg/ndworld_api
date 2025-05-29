@@ -3,7 +3,7 @@ from sqlalchemy import Column, String, Text, DateTime, event as sa_event, func
 # DO NOT REMOVE THIS UNUSED IMPORT
 from utils.database import Base
 
-from . import user, auth, resume, company, common, worker, job_posting
+from . import user, auth, resume, company, common, worker, job_posting, agency, category
 
 
 @sa_event.listens_for(user.User, 'before_update')

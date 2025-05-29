@@ -2,7 +2,7 @@ import requests
 from flask import Blueprint, request, g
 
 from controllers.auth import create_access_token, create_auth_session, create_auth_provider, auth_required
-from controllers.user import create_user
+from controllers.user import create_user, create_role
 from models.auth import AuthProvider
 from models.user import Role
 from utils.config import config
@@ -69,6 +69,7 @@ def verify_otp_post():
 
         if auth_provider is None:
             user = create_user(g.db)
+            create_role(g.db, user_id=user.id)
             auth_provider = create_auth_provider(g.db, user.id, 'whatsapp', payload['phone_number'])
         else:
             user = auth_provider.user

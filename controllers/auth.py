@@ -20,7 +20,7 @@ def create_access_token(data):
     }, SECRET_KEY, algorithm="HS256")
 
 
-def check_auth_token():
+def check_auth_token(type_=None):
     token = request.headers['Authorization'][7:] if 'Authorization' in request.headers else None
 
     if not token:
@@ -42,16 +42,25 @@ def check_auth_token():
                 .filter(User.id == g.auth_session.user_id, User.is_disabled.isnot(True)) \
                 .first()
             g.role = g.auth_session.role if g.user else None
-            g.company = g.role.company if g.role else None
-            g.branch = g.role.branch if g.role else None
+            if type_ == 'company':
+                assert g.role and g.role.company
+                g.company = g.role.company
+                g.agency = None
+            elif type_ == 'agency':
+                assert g.role and g.role.agency
+                g.agency = g.role.agency
+                g.company = None
+            else:
+                g.company = None
+                g.agency = None
     except Exception as e:
         raise ResponseException(payload=str(e), status='token_is_invalid', status_code=401)
 
 
-def check_user(role=None):
+def check_user(role=None, type_=None):
     if request.method == 'OPTIONS':
         return
-    check_auth_token()
+    check_auth_token(type_)
     if not hasattr(g, 'user') or not g.user:
         raise ResponseException(payload='User not authorized', status='not_authorized', status_code=401)
     if role is not None:
@@ -70,7 +79,31 @@ def auth_required(role=None):
     return wrapper
 
 
-def create_auth_session(db, user_id: int, role_id: int=None, fcm_token=None):
+def agency_auth_required(role=None):
+    def wrapper(fn):
+        @wraps(fn)
+        def wrapped_function(*args, **kwargs):
+            check_user(role=role, type_='agency')
+            return fn(*args, **kwargs)
+
+        return wrapped_function
+
+    return wrapper
+
+
+def company_auth_required(role=None):
+    def wrapper(fn):
+        @wraps(fn)
+        def wrapped_function(*args, **kwargs):
+            check_user(role=role, type_='company')
+            return fn(*args, **kwargs)
+
+        return wrapped_function
+
+    return wrapper
+
+
+def create_auth_session(db, user_id: int, role_id: int = None, fcm_token=None):
     if role_id:
         assert db.query(Role).filter(Role.id == role_id, Role.user_id == user_id).one()
 
@@ -96,7 +129,7 @@ def create_auth_provider(db, user_id: int, name: str, identifier: str):
     provider.name = name
     provider.identifier = identifier or None
 
-    g.db.add(provider)
-    g.db.flush()
+    db.add(provider)
+    db.flush()
 
     return provider

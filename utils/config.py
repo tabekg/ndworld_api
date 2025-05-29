@@ -14,3 +14,5 @@ SECRET_KEY = config.get('system', 'secret_key')
 STORAGE_DIRECTORIES = []
 
 ACCESS_TOKEN_EXPIRE_DAYS = 90
+
+DEFAULT_AGENCY_ID = 4

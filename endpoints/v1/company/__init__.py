@@ -1,6 +1,6 @@
 from flask import Blueprint
 
-from controllers.auth import auth_required
+from controllers.auth import company_auth_required
 from utils.http import make_response
 from . import recruitment
 
@@ -10,7 +10,7 @@ bp.register_blueprint(recruitment.bp)
 
 
 @bp.before_request
-@auth_required()
+@company_auth_required()
 def before_request():
     pass
 

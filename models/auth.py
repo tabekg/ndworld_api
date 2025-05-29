@@ -41,4 +41,11 @@ class AuthSession(Base):
     role = relationship("Role", back_populates="auth_sessions", passive_deletes=True)
 
     def to_dict_item(self):
-        return orm_to_dict(self, ['expired_at', 'is_active', 'created_at', 'last_action_at'])
+        return orm_to_dict(self, [
+            'expired_at', 'is_active', 'created_at', 'last_action_at',
+        ], {
+            'role': lambda a: orm_to_dict(a.role, ['permissions'], {
+                'agency': lambda b: orm_to_dict(b.agency, ['title']),
+                'company': lambda b: orm_to_dict(b.company, ['title']),
+            }),
+        })

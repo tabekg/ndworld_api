@@ -21,8 +21,8 @@ def index_get():
 def index_post():
     data = request.json
 
-    g.user.first_name = data.get('first_name', g.user.first_name) or None
-    g.user.last_name = data.get('last_name', g.user.last_name) or None
+    g.user.name = data.get('name', g.user.name) or None
+    g.user.surname = data.get('surname', g.user.surname) or None
 
     g.db.commit()
 

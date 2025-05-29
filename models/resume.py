@@ -1,8 +1,10 @@
 import enum
 
-from sqlalchemy import String, Column, Text, Date, Integer, ForeignKey, Enum
+from sqlalchemy import String, Column, Text, Date, Integer, ForeignKey, Enum, ARRAY
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
+from sqlalchemy_json import mutable_json_type
 
 from models.common import job_offer_resumes
 from utils.database import Base
@@ -19,32 +21,37 @@ class ResumeStatusEnum(str, enum.Enum):
 class Resume(Base):
     __tablename__ = 'resumes'
 
-    company_id = Column(Integer, ForeignKey('companies.id', ondelete='CASCADE'), nullable=False)
+    agency_id = Column(Integer, ForeignKey('agencies.id', ondelete='CASCADE'), nullable=False)
 
-    first_name = Column(String(255), nullable=True)
-    last_name = Column(String(255), nullable=True)
+    name = Column(String(255), nullable=False)
+    surname = Column(String(255), nullable=False)
+    patronymic = Column(String(255), nullable=True)
 
     status = Column(Enum(ResumeStatusEnum), nullable=False)
     summary = Column(Text, nullable=True)
-    contact_email = Column(String(255), nullable=True)
-    contact_phone_number = Column(String(255), nullable=True)
-    contact_whatsapp = Column(String(255), nullable=True)
     marital_status = Column(String(255), nullable=True)
     birth_date = Column(Date, nullable=True)
     about = Column(Text, nullable=True)
+    residential_address = Column(String(255), nullable=True)
+    registered_address = Column(String(255), nullable=True)
 
-    photo_path = Column(String(255), nullable=True)
-    photo_id = Column(Integer, nullable=True)
-    front_passport_id = Column(Integer, nullable=True)
-    back_passport_id = Column(Integer, nullable=True)
-    front_passport_path = Column(String(255), nullable=True)
-    back_passport_path = Column(String(255), nullable=True)
+    instagram = Column(String(255), nullable=True)
+    telegram = Column(String(255), nullable=True)
+    email = Column(String(255), nullable=True)
+    linkedin = Column(String(255), nullable=True)
+    phone_number = Column(String(255), nullable=True)
+    phone_numbers = Column(ARRAY(String(30)), nullable=True)
+
+    photo = Column(mutable_json_type(dbtype=JSONB, nested=True), nullable=True)
+    photos = Column(mutable_json_type(dbtype=JSONB, nested=True), nullable=True)
+    passport_front = Column(mutable_json_type(dbtype=JSONB, nested=True), nullable=True)
+    passport_back = Column(mutable_json_type(dbtype=JSONB, nested=True), nullable=True)
 
     experiences = relationship("ResumeExperience", back_populates="resume", passive_deletes=True)
     educations = relationship("ResumeEducation", back_populates="resume", passive_deletes=True)
     skills = relationship("ResumeSkill", back_populates="resume", passive_deletes=True)
 
-    company = relationship("Company", back_populates="resumes")
+    agency = relationship("Agency", back_populates="resumes")
     job_offers = relationship("JobOffer", secondary=job_offer_resumes, back_populates="resumes")
     workers = relationship("Worker", back_populates="resume", passive_deletes=True)
 

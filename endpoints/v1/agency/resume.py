@@ -3,11 +3,11 @@ from flask import Blueprint, request, g
 from models.resume import Resume
 from utils.http import make_response
 
-bp = Blueprint('recruitment', __name__, url_prefix='/recruitment')
+bp = Blueprint('resume', __name__, url_prefix='/resume')
 
 
-@bp.get('/resume/check')
-def resume_check_get():
+@bp.get('/check')
+def check_get():
     name = request.args['name']
     surname = request.args['surname']
 
