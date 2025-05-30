@@ -9,7 +9,10 @@ from utils.database import Base
 class Category(Base):
     __tablename__ = 'categories'
 
-    title = Column(String(255), nullable=False)
+    title_ru = Column(String(255), nullable=False)
+    title_en = Column(String(255), nullable=False)
+    title_ky = Column(String(255), nullable=False)
+    title_tr = Column(String(255), nullable=False)
 
     payload = Column(mutable_json_type(dbtype=JSONB, nested=True), nullable=True)
     resume_fields = Column(mutable_json_type(dbtype=JSONB, nested=True), nullable=True)
