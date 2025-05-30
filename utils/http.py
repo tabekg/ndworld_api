@@ -1,3 +1,6 @@
+from utils.config import DEFAULT_LANGUAGE
+
+
 def make_response(payload=None, status='success', status_code=200):
     return {
         'status': status,
@@ -28,7 +31,13 @@ def orm_to_dict(orm, keys=None, additional_fields=None):
             items.append(d)
         return items
 
-    resp = {k: getattr(orm, k) for k in keys}
+    resp = {}
+
+    for k in keys:
+        if hasattr(orm, k):
+            resp[k] = getattr(orm, k)
+        elif hasattr(orm, k + '_' + DEFAULT_LANGUAGE):
+            resp[k] = getattr(orm, k + '_' + DEFAULT_LANGUAGE)
 
     for j in additional_fields.keys():
         resp[j] = additional_fields[j](orm)

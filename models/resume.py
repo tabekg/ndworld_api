@@ -22,12 +22,12 @@ class Resume(Base):
     __tablename__ = 'resumes'
 
     agency_id = Column(Integer, ForeignKey('agencies.id', ondelete='CASCADE'), nullable=False)
+    status = Column(Enum(ResumeStatusEnum), nullable=False)
 
     name = Column(String(255), nullable=False)
     surname = Column(String(255), nullable=False)
     patronymic = Column(String(255), nullable=True)
 
-    status = Column(Enum(ResumeStatusEnum), nullable=False)
     summary = Column(Text, nullable=True)
     marital_status = Column(String(255), nullable=True)
     birth_date = Column(Date, nullable=True)
@@ -46,6 +46,7 @@ class Resume(Base):
     photos = Column(mutable_json_type(dbtype=JSONB, nested=True), nullable=True)
     passport_front = Column(mutable_json_type(dbtype=JSONB, nested=True), nullable=True)
     passport_back = Column(mutable_json_type(dbtype=JSONB, nested=True), nullable=True)
+    birth_certificate = Column(mutable_json_type(dbtype=JSONB, nested=True), nullable=True)
 
     experiences = relationship("ResumeExperience", back_populates="resume", passive_deletes=True)
     educations = relationship("ResumeEducation", back_populates="resume", passive_deletes=True)
@@ -65,11 +66,26 @@ class Resume(Base):
 
     def to_dict_item(self):
         return orm_to_dict(self, [
+            'name',
+            'surname',
+            'patronymic',
+
+            'status',
             'summary',
-            'contact_email', 'contact_phone_number',
             'marital_status',
-            'birth_date', 'about',
-            'photo_path',
+            'birth_date',
+            'about',
+            'residential_address',
+            'registered_address',
+
+            'instagram',
+            'telegram',
+            'email',
+            'linkedin',
+            'phone_number',
+            'phone_numbers',
+
+            'photo',
         ], additional_fields={
             'experiences': lambda a: orm_to_dict(a.experiences),
             'educations': lambda a: orm_to_dict(a.educations),
