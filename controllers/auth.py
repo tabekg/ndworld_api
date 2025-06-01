@@ -103,7 +103,7 @@ def company_auth_required(role=None):
     return wrapper
 
 
-def create_auth_session(db, user_id: int, role_id: int = None, fcm_token=None):
+def create_auth_session(db, user_id: int, auth_provider_id: int, role_id: int = None, fcm_token=None):
     if role_id:
         assert db.query(Role).filter(Role.id == role_id, Role.user_id == user_id).one()
 
@@ -116,6 +116,7 @@ def create_auth_session(db, user_id: int, role_id: int = None, fcm_token=None):
     session.expired_at = datetime.now(tz=timezone.utc) + timedelta(days=ACCESS_TOKEN_EXPIRE_DAYS)
     session.is_active = True
     session.last_action_at = datetime.now(tz=timezone.utc)
+    session.auth_provider_id = auth_provider_id
 
     db.add(session)
     db.flush()

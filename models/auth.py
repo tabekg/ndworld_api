@@ -17,6 +17,7 @@ class AuthProvider(Base):
     payload = Column(mutable_json_type(dbtype=JSONB, nested=True), nullable=True)
 
     user = relationship("User", back_populates="auth_providers", passive_deletes=True)
+    auth_sessions = relationship("AuthSession", back_populates="auth_provider", passive_deletes=True)
 
     def to_dict_item(self):
         return orm_to_dict(self, ['name', 'identifier', 'payload'])
@@ -27,6 +28,7 @@ class AuthSession(Base):
 
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     role_id = Column(Integer, ForeignKey("roles.id", ondelete="CASCADE"), nullable=True)
+    auth_provider_id = Column(Integer, ForeignKey("auth_providers.id", ondelete="CASCADE"), nullable=False)
 
     hash = Column(String(255), nullable=False, unique=True)
     fcm_token = Column(String(255), nullable=True)
@@ -39,6 +41,7 @@ class AuthSession(Base):
 
     user = relationship("User", back_populates="auth_sessions", passive_deletes=True)
     role = relationship("Role", back_populates="auth_sessions", passive_deletes=True)
+    auth_provider = relationship("AuthProvider", back_populates="auth_sessions", passive_deletes=True)
 
     def to_dict_item(self):
         return orm_to_dict(self, [

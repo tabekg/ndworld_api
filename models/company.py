@@ -1,4 +1,4 @@
-from sqlalchemy import String, Column, Boolean, Integer, ForeignKey
+from sqlalchemy import String, Column, Boolean
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 from sqlalchemy_json import mutable_json_type
@@ -24,9 +24,6 @@ class Company(Base):
     address_ky = Column(String(255), nullable=False)
     address_tr = Column(String(255), nullable=False)
 
-    category_id = Column(Integer, ForeignKey('categories.id', ondelete='CASCADE'), nullable=False)
-
-    category = relationship("Category", back_populates="companies", passive_deletes=True)
     workers = relationship("Worker", back_populates="company", passive_deletes=True, foreign_keys='Worker.company_id')
     roles = relationship("Role", back_populates="company", passive_deletes=True)
     job_postings = relationship("JobPosting", back_populates="company", passive_deletes=True)

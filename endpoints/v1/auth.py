@@ -79,7 +79,7 @@ def verify_otp_post():
         if len(user.roles) > 0:
             role_id = user.roles[0].id
 
-        auth_session = create_auth_session(g.db, user_id=user.id, role_id=role_id)
+        auth_session = create_auth_session(g.db, user_id=user.id, role_id=role_id, auth_provider_id=auth_provider.id)
 
         g.db.commit()
 
@@ -111,4 +111,22 @@ def role_post():
     g.auth_session.role_id = role.id
     g.db.commit()
 
-    return make_response()
+    return make_response(
+        payload={
+            'user': g.user.to_dict_item(),
+            'auth_session': g.auth_session.to_dict_item(),
+            'auth_provider': g.auth_session.auth_provider.to_dict_item(),
+        },
+    )
+
+
+@bp.get('')
+@auth_required()
+def index_get():
+    return make_response(
+        payload={
+            'user': g.user.to_dict_item(),
+            'auth_session': g.auth_session.to_dict_item(),
+            'auth_provider': g.auth_session.auth_provider.to_dict_item(),
+        },
+    )
