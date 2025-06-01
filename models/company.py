@@ -10,19 +10,11 @@ from utils.http import orm_to_dict
 class Company(Base):
     __tablename__ = 'companies'
 
-    title_ru = Column(String(255), nullable=False)
-    title_en = Column(String(255), nullable=False)
-    title_ky = Column(String(255), nullable=False)
-    title_tr = Column(String(255), nullable=False)
-
+    title = Column(String(255), nullable=False)
     payload = Column(mutable_json_type(dbtype=JSONB, nested=True), nullable=True)
     is_disabled = Column(Boolean, default=False, nullable=False)
     resume_fields = Column(mutable_json_type(dbtype=JSONB, nested=True), nullable=True)
-
-    address_ru = Column(String(255), nullable=False)
-    address_en = Column(String(255), nullable=False)
-    address_ky = Column(String(255), nullable=False)
-    address_tr = Column(String(255), nullable=False)
+    address = Column(String(255), nullable=False)
 
     workers = relationship("Worker", back_populates="company", passive_deletes=True, foreign_keys='Worker.company_id')
     roles = relationship("Role", back_populates="company", passive_deletes=True)

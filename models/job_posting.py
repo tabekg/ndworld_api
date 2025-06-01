@@ -29,16 +29,8 @@ class JobPosting(Base):
 
     company_id = Column(Integer, ForeignKey('companies.id', ondelete='CASCADE'), nullable=False)
 
-    title_ru = Column(String(255), nullable=False)
-    title_en = Column(String(255), nullable=False)
-    title_ky = Column(String(255), nullable=False)
-    title_tr = Column(String(255), nullable=False)
-
-    description_ru = Column(Text, nullable=True)
-    description_en = Column(Text, nullable=True)
-    description_ky = Column(Text, nullable=True)
-    description_tr = Column(Text, nullable=True)
-
+    title = Column(String(255), nullable=False)
+    description = Column(Text, nullable=True)
     location = Column(String(255), nullable=True)
     status = Column(Enum(JobPostingStatusEnum), nullable=False, default=JobPostingStatusEnum.draft)
     payload = Column(mutable_json_type(dbtype=JSONB, nested=True), nullable=True)

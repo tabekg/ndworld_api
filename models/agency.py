@@ -9,15 +9,8 @@ from utils.database import Base
 class Agency(Base):
     __tablename__ = 'agencies'
 
-    title_ru = Column(String(255), nullable=False)
-    title_en = Column(String(255), nullable=False)
-    title_ky = Column(String(255), nullable=False)
-    title_tr = Column(String(255), nullable=False)
-
-    address_ru = Column(String(255), nullable=False)
-    address_en = Column(String(255), nullable=False)
-    address_ky = Column(String(255), nullable=False)
-    address_tr = Column(String(255), nullable=False)
+    title = Column(String(255), nullable=False)
+    address = Column(String(255), nullable=False)
 
     payload = Column(mutable_json_type(dbtype=JSONB, nested=True), nullable=True)
     is_disabled = Column(Boolean, default=False, nullable=False)
