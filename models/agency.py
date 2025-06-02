@@ -3,6 +3,7 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 from sqlalchemy_json import mutable_json_type
 
+from models.common import agency_companies
 from utils.database import Base
 
 
@@ -17,3 +18,4 @@ class Agency(Base):
 
     roles = relationship("Role", back_populates="agency", passive_deletes=True)
     resumes = relationship("Resume", back_populates="agency", passive_deletes=True)
+    companies = relationship("Company", secondary=agency_companies, back_populates="agencies")

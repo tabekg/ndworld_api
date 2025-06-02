@@ -3,6 +3,7 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 from sqlalchemy_json import mutable_json_type
 
+from models.common import agency_companies
 from utils.database import Base
 from utils.http import orm_to_dict
 
@@ -20,6 +21,8 @@ class Company(Base):
     roles = relationship("Role", back_populates="company", passive_deletes=True)
     job_postings = relationship("JobPosting", back_populates="company", passive_deletes=True)
     job_offers = relationship("JobOffer", back_populates="company", passive_deletes=True)
+
+    agencies = relationship("Agency", secondary=agency_companies, back_populates="companies")
 
     def to_dict_item(self):
         return orm_to_dict(self, [
