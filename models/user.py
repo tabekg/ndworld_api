@@ -11,7 +11,7 @@ from utils.http import orm_to_dict
 class Role(Base):
     __tablename__ = 'roles'
 
-    permissions = Column(ARRAY(VARCHAR(255)), nullable=False, default=list, server_default='{}')
+    role = Column(String(255), nullable=False)
 
     user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
     company_id = Column(Integer, ForeignKey('companies.id', ondelete='CASCADE'), nullable=True)
@@ -26,6 +26,7 @@ class Role(Base):
 
     def to_dict_item(self):
         return orm_to_dict(self, [
+            'role',
             'created_at',
         ])
 
