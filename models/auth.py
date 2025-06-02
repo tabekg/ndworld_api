@@ -47,7 +47,7 @@ class AuthSession(Base):
         return orm_to_dict(self, [
             'expired_at', 'is_active', 'created_at', 'last_action_at',
         ], {
-            'role': lambda a: orm_to_dict(a.role, ['permissions'], {
+            'role': lambda a: orm_to_dict(a.role, ['role'], {
                 'agency': lambda b: orm_to_dict(b.agency, ['title']),
                 'company': lambda b: orm_to_dict(b.company, ['title']),
             }),

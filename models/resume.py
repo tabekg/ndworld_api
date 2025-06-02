@@ -22,6 +22,7 @@ class Resume(Base):
     __tablename__ = 'resumes'
 
     agency_id = Column(Integer, ForeignKey('agencies.id', ondelete='CASCADE'), nullable=False)
+    role_id = Column(Integer, ForeignKey('roles.id', ondelete='CASCADE'), nullable=False)
     status = Column(Enum(ResumeStatusEnum), nullable=False)
 
     name = Column(String(255), nullable=False)
@@ -53,6 +54,7 @@ class Resume(Base):
     skills = relationship("ResumeSkill", back_populates="resume", passive_deletes=True)
 
     agency = relationship("Agency", back_populates="resumes")
+    role = relationship("Role", back_populates="resumes")
     job_offers = relationship("JobOffer", secondary=job_offer_resumes, back_populates="resumes")
     workers = relationship("Worker", back_populates="resume", passive_deletes=True)
 
@@ -66,11 +68,12 @@ class Resume(Base):
 
     def to_dict_item(self):
         return orm_to_dict(self, [
+            'status',
+
             'name',
             'surname',
             'patronymic',
 
-            'status',
             'summary',
             'marital_status',
             'birth_date',
@@ -86,6 +89,10 @@ class Resume(Base):
             'phone_numbers',
 
             'photo',
+            'photos',
+            'passport_front',
+            'passport_back',
+            'birth_certificate',
         ], additional_fields={
             'experiences': lambda a: orm_to_dict(a.experiences),
             'educations': lambda a: orm_to_dict(a.educations),

@@ -1,11 +1,10 @@
-from sqlalchemy import String, Column, Boolean, Integer, ForeignKey, VARCHAR
-from sqlalchemy.dialects.postgresql import JSONB, ARRAY
+from sqlalchemy import String, Column, Boolean, Integer, ForeignKey
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 from sqlalchemy_json import mutable_json_type
 
 from utils.database import Base
 from utils.http import orm_to_dict
-
 
 
 class Role(Base):
@@ -23,6 +22,7 @@ class Role(Base):
     company = relationship("Company", back_populates="roles", passive_deletes=True)
     agency = relationship("Agency", back_populates="roles", passive_deletes=True)
     auth_sessions = relationship("AuthSession", back_populates="role", passive_deletes=True)
+    resumes = relationship("Resume", back_populates="role", passive_deletes=True)
 
     def to_dict_item(self):
         return orm_to_dict(self, [
@@ -50,7 +50,7 @@ class User(Base):
             'payload', 'is_disabled',
             'created_at',
         ], {
-            'roles': lambda a: orm_to_dict(a.roles, [], {
+            'roles': lambda a: orm_to_dict(a.roles, ['role'], {
                 'company': lambda b: orm_to_dict(b.company, ['title']) if b.company else None,
                 'agency': lambda b: orm_to_dict(b.agency, ['title']) if b.agency else None,
             }),

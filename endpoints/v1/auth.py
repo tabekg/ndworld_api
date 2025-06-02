@@ -18,6 +18,11 @@ def send_otp_post():
 
     assert phone_number and phone_number[0] != '+'
 
+    g.db.query(AuthProvider).filter(
+        AuthProvider.name == 'whatsapp',
+        AuthProvider.identifier == phone_number,
+    ).one()
+
     response = requests.post(config.get('besoft_cloud', 'api_url') + '/tp/v1/authentication/send-otp', params={
         '_project_key': config.get('besoft_cloud', 'public_key'),
     }, json={
@@ -65,14 +70,14 @@ def verify_otp_post():
         auth_provider = g.db.query(AuthProvider).filter(
             AuthProvider.name == 'whatsapp',
             AuthProvider.identifier == payload['phone_number'],
-        ).first()
+        ).one()
 
-        if auth_provider is None:
-            user = create_user(g.db)
-            create_role(g.db, user_id=user.id)
-            auth_provider = create_auth_provider(g.db, user.id, 'whatsapp', payload['phone_number'])
-        else:
-            user = auth_provider.user
+        # if auth_provider is None:
+        #     user = create_user(g.db)
+        #     create_role(g.db, user_id=user.id)
+        #     auth_provider = create_auth_provider(g.db, user.id, 'whatsapp', payload['phone_number'])
+        # else:
+        user = auth_provider.user
 
         role_id = None
 
