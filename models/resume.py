@@ -6,7 +6,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
 from sqlalchemy_json import mutable_json_type
 
-from models.common import job_offer_resumes
+from models.common import resume_categories
 from utils.database import Base
 from utils.http import orm_to_dict
 
@@ -55,8 +55,8 @@ class Resume(Base):
 
     agency = relationship("Agency", back_populates="resumes")
     role = relationship("Role", back_populates="resumes")
-    job_offers = relationship("JobOffer", secondary=job_offer_resumes, back_populates="resumes")
     workers = relationship("Worker", back_populates="resume", passive_deletes=True)
+    categories = relationship("Category", secondary=resume_categories, back_populates="resumes")
 
     @hybrid_property
     def is_active(self):

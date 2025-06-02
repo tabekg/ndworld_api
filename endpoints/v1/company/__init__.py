@@ -2,12 +2,11 @@ from flask import Blueprint
 
 from controllers.auth import company_auth_required
 from utils.http import make_response
-from . import recruitment, job_posting
+from . import recruitment
 
 bp = Blueprint('company', __name__, url_prefix='/company')
 
 bp.register_blueprint(recruitment.bp)
-bp.register_blueprint(job_posting.bp)
 
 
 @bp.before_request

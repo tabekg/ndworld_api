@@ -1,37 +1,47 @@
-import enum
-
-from sqlalchemy import Column, Text, Integer, ForeignKey, Enum, DateTime
+from sqlalchemy import Column, Text, Integer, ForeignKey
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
+from sqlalchemy_json import mutable_json_type
 
 from utils.database import Base
 
 
-class WorkerStatusEnum(str, enum.Enum):
-    pending = 'PENDING'
-    hired = 'HIRED'
-    rejected = 'REJECTED'
-    #   TODO: more statuses...
-    active = 'ACTIVE'
-    resigned = 'RESIGNED'
-    terminated = "TERMINATED"
-    completed = "COMPLETED"
+WORKER_LEVEL_PENDING = 0
+WORKER_LEVEL_APPROVED = 100
+WORKER_LEVEL_REJECTED = -100
+WORKER_LEVEL_HIRED = 200
+WORKER_LEVEL_ACTIVE = 500
+WORKER_LEVEL_RESIGNED = 600
+WORKER_LEVEL_TERMINATED = 700
+WORKER_LEVEL_COMPLETED = 1000
 
 
 class Worker(Base):
     __tablename__ = 'workers'
 
-    agent_id = Column(Integer, ForeignKey('companies.id', ondelete='CASCADE'), nullable=False)
+    agency_id = Column(Integer, ForeignKey('agencies.id', ondelete='CASCADE'), nullable=False)
     company_id = Column(Integer, ForeignKey('companies.id', ondelete='CASCADE'), nullable=False)
     resume_id = Column(Integer, ForeignKey('resumes.id', ondelete='CASCADE'), nullable=False)
-    job_posting_id = Column(Integer, ForeignKey('job_postings.id', ondelete='CASCADE'), nullable=False)
-    job_offer_id = Column(Integer, ForeignKey('job_offers.id', ondelete='CASCADE'), nullable=False)
 
-    status = Column(Enum(WorkerStatusEnum), nullable=False)
-    hired_at = Column(DateTime, nullable=True)
-    comment = Column(Text, nullable=True)
+    level = Column(Integer, nullable=False, default=WORKER_LEVEL_PENDING, server_default=f'{WORKER_LEVEL_PENDING}')
+    payload = Column(mutable_json_type(dbtype=JSONB, nested=True), nullable=True)
 
-    agent = relationship("Company", back_populates="workers", foreign_keys="Worker.agent_id")
+    agency = relationship("Agency", back_populates="workers", foreign_keys="Worker.agency_id")
     company = relationship("Company", back_populates="workers", foreign_keys="Worker.company_id")
     resume = relationship("Resume", back_populates="workers", passive_deletes=True)
-    job_posting = relationship("JobPosting", back_populates="workers", passive_deletes=True)
-    job_offer = relationship("JobOffer", back_populates="workers", passive_deletes=True)
+
+    steps = relationship("WorkerSteps", back_populates="worker", foreign_keys="WorkerSteps.worker_id")
+
+
+class WorkerStep(Base):
+    __tablename__ = 'worker_steps'
+
+    worker_id = Column(Integer, ForeignKey('workers.id', ondelete='CASCADE'), nullable=False)
+    role_id = Column(Integer, ForeignKey('roles.id', ondelete='CASCADE'), nullable=False)
+
+    level = Column(Integer, nullable=False, default=WORKER_LEVEL_PENDING, server_default=f'{WORKER_LEVEL_PENDING}')
+    payload = Column(mutable_json_type(dbtype=JSONB, nested=True), nullable=True)
+    comment = Column(Text, nullable=True)
+
+    worker = relationship("Worker", back_populates="steps", foreign_keys="Worker.agency_id")
+    role = relationship("Role", foreign_keys="WorkerStep.role_id")

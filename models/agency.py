@@ -19,3 +19,4 @@ class Agency(Base):
     roles = relationship("Role", back_populates="agency", passive_deletes=True)
     resumes = relationship("Resume", back_populates="agency", passive_deletes=True)
     companies = relationship("Company", secondary=agency_companies, back_populates="agencies")
+    workers = relationship("Worker", back_populates="agency", passive_deletes=True)
