@@ -16,6 +16,20 @@ WORKER_LEVEL_TERMINATED = 700
 WORKER_LEVEL_COMPLETED = 1000
 
 
+class WorkerStep(Base):
+    __tablename__ = 'worker_steps'
+
+    worker_id = Column(Integer, ForeignKey('workers.id', ondelete='CASCADE'), nullable=False)
+    role_id = Column(Integer, ForeignKey('roles.id', ondelete='CASCADE'), nullable=False)
+
+    level = Column(Integer, nullable=False, default=WORKER_LEVEL_PENDING, server_default=f'{WORKER_LEVEL_PENDING}')
+    payload = Column(mutable_json_type(dbtype=JSONB, nested=True), nullable=True)
+    comment = Column(Text, nullable=True)
+
+    worker = relationship("Worker", back_populates="steps")
+    role = relationship("Role", foreign_keys="WorkerStep.role_id")
+
+
 class Worker(Base):
     __tablename__ = 'workers'
 
@@ -30,18 +44,4 @@ class Worker(Base):
     company = relationship("Company", back_populates="workers", foreign_keys="Worker.company_id")
     resume = relationship("Resume", back_populates="workers", passive_deletes=True)
 
-    steps = relationship("WorkerSteps", back_populates="worker", foreign_keys="WorkerSteps.worker_id")
-
-
-class WorkerStep(Base):
-    __tablename__ = 'worker_steps'
-
-    worker_id = Column(Integer, ForeignKey('workers.id', ondelete='CASCADE'), nullable=False)
-    role_id = Column(Integer, ForeignKey('roles.id', ondelete='CASCADE'), nullable=False)
-
-    level = Column(Integer, nullable=False, default=WORKER_LEVEL_PENDING, server_default=f'{WORKER_LEVEL_PENDING}')
-    payload = Column(mutable_json_type(dbtype=JSONB, nested=True), nullable=True)
-    comment = Column(Text, nullable=True)
-
-    worker = relationship("Worker", back_populates="steps", foreign_keys="Worker.agency_id")
-    role = relationship("Role", foreign_keys="WorkerStep.role_id")
+    steps = relationship("WorkerStep", back_populates="worker", foreign_keys="WorkerStep.worker_id")

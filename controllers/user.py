@@ -1,5 +1,4 @@
 from models.user import User, Role
-from utils.config import DEFAULT_AGENCY_ID
 
 
 def create_user(db):
@@ -11,7 +10,7 @@ def create_user(db):
     return user
 
 
-def create_role(db, user_id, agency_id=DEFAULT_AGENCY_ID):
+def create_role(db, user_id, agency_id):
     role = Role(
         user_id=user_id,
         agency_id=agency_id,

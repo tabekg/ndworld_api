@@ -17,7 +17,11 @@ class Category(Base):
     payload = Column(mutable_json_type(dbtype=JSONB, nested=True), nullable=True)
     is_disabled = Column(Boolean, default=False, nullable=False)
 
-    parent = relationship("Category", back_populates="parent", passive_deletes=True)
+    parent = relationship(
+        'Category',
+        remote_side='Category.id',
+        backref='children'
+    )
     resumes = relationship("Resume", secondary=resume_categories, back_populates="categories")
 
     def to_dict_item(self):

@@ -1,8 +1,7 @@
 import requests
 from flask import Blueprint, request, g
 
-from controllers.auth import create_access_token, create_auth_session, create_auth_provider, auth_required
-from controllers.user import create_user, create_role
+from controllers.auth import create_access_token, create_auth_session, auth_required
 from models.auth import AuthProvider
 from models.user import Role
 from utils.config import config
@@ -18,10 +17,12 @@ def send_otp_post():
 
     assert phone_number and phone_number[0] != '+'
 
-    g.db.query(AuthProvider).filter(
+    auth_provider = g.db.query(AuthProvider).filter(
         AuthProvider.name == 'whatsapp',
         AuthProvider.identifier == phone_number,
     ).one()
+
+    assert auth_provider.user.is_disabled is False
 
     response = requests.post(config.get('besoft_cloud', 'api_url') + '/tp/v1/authentication/send-otp', params={
         '_project_key': config.get('besoft_cloud', 'public_key'),
