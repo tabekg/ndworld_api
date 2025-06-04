@@ -5,6 +5,7 @@ from sqlalchemy_json import mutable_json_type
 
 from models.common import agency_companies
 from utils.database import Base
+from utils.http import orm_to_dict
 
 
 class Agency(Base):
@@ -20,3 +21,9 @@ class Agency(Base):
     resumes = relationship("Resume", back_populates="agency", passive_deletes=True)
     companies = relationship("Company", secondary=agency_companies, back_populates="agencies")
     workers = relationship("Worker", back_populates="agency", passive_deletes=True)
+
+    def to_dict_item(self):
+        return orm_to_dict(self, [
+            'title', 'address',
+            'payload', 'is_disabled',
+        ])

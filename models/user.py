@@ -28,7 +28,9 @@ class Role(Base):
         return orm_to_dict(self, [
             'role',
             'created_at',
-        ])
+        ], {
+            'user': lambda a: orm_to_dict(a.user, ['name', 'surname']),
+        })
 
 
 class User(Base):

@@ -12,9 +12,9 @@ class Company(Base):
     __tablename__ = 'companies'
 
     title = Column(String(255), nullable=False)
+    address = Column(String(255), nullable=False)
     payload = Column(mutable_json_type(dbtype=JSONB, nested=True), nullable=True)
     is_disabled = Column(Boolean, default=False, nullable=False)
-    address = Column(String(255), nullable=False)
 
     workers = relationship("Worker", back_populates="company", passive_deletes=True, foreign_keys='Worker.company_id')
     roles = relationship("Role", back_populates="company", passive_deletes=True)
@@ -23,7 +23,6 @@ class Company(Base):
 
     def to_dict_item(self):
         return orm_to_dict(self, [
-            'title', 'type',
+            'title', 'address',
             'payload', 'is_disabled',
-            'created_at',
         ])

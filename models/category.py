@@ -27,6 +27,7 @@ class Category(Base):
     def to_dict_item(self):
         return orm_to_dict(self, [
             'title',
-            'payload', 'is_disabled',
-            'created_at',
+            'payload',
+            'is_disabled',
+            'parent_id',
         ])
