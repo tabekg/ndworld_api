@@ -2,7 +2,7 @@ from sqlalchemy import Column, String, Text, DateTime, event as sa_event, func
 
 from utils.database import Base
 
-from . import user, auth, resume, company, common, worker, agency, category
+from . import user, auth, resume, company, common, worker, agency, category, translation
 
 
 @sa_event.listens_for(user.User, 'before_update')

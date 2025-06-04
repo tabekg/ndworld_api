@@ -1,12 +1,12 @@
 import os
 
 from flask_cors import CORS
-from flask import Flask, g, send_file
+from flask import Flask, g, send_file, request
 from sqlalchemy.exc import NoResultFound, MultipleResultsFound, DataError
 
 from endpoints import bp as endpoints
 from utils.database import SessionLocal
-from utils.config import STORAGE_PATH, STORAGE_DIRECTORIES
+from utils.config import STORAGE_PATH, STORAGE_DIRECTORIES, DEFAULT_LANGUAGE
 from utils.exception import ResponseException
 
 app = Flask(__name__)
@@ -18,6 +18,7 @@ def before_request():
     g.db = SessionLocal()
     g.user = None
     g.resume = None
+    g.locale = request.headers.get('Accept-Language') or DEFAULT_LANGUAGE
 
 
 @app.after_request

@@ -1,3 +1,8 @@
+from flask import g
+
+from models.translation import Translation
+
+
 def make_response(payload=None, status='success', status_code=200):
     return {
         'status': status,
@@ -5,7 +10,7 @@ def make_response(payload=None, status='success', status_code=200):
     }, status_code
 
 
-def orm_to_dict(orm, keys=None, additional_fields=None):
+def orm_to_dict(orm, keys=None, additional_fields=None, translate=None):
     if keys is None:
         keys = []
     if orm is None:
@@ -14,17 +19,15 @@ def orm_to_dict(orm, keys=None, additional_fields=None):
         keys += ['id']
     if additional_fields is None:
         additional_fields = {}
+    if translate is None:
+        translate = {}
     if isinstance(orm, list):
         items = []
         for i in orm:
             if len(keys) == 1 and hasattr(i, 'to_dict_list'):
                 d = i.to_dict_list()
             else:
-                d = {}
-                for j in keys:
-                    d[j] = getattr(i, j)
-                for j in additional_fields.keys():
-                    d[j] = additional_fields[j](i)
+                d = orm_to_dict(i, keys, additional_fields, translate)
             items.append(d)
         return items
 
@@ -33,6 +36,13 @@ def orm_to_dict(orm, keys=None, additional_fields=None):
     for k in keys:
         if hasattr(orm, k):
             resp[k] = getattr(orm, k)
+            if k in translate:
+                translation = g.db.query(Translation).filter(
+                    Translation.source_text == resp[k],
+                    Translation.target_language == g.locale,
+                ).first()
+                if translation:
+                    resp[k] = translation.target_text
         # elif hasattr(orm, k + '_' + DEFAULT_LANGUAGE):
         #     resp[k] = getattr(orm, k + '_' + DEFAULT_LANGUAGE)
 

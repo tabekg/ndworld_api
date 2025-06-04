@@ -3,6 +3,7 @@ from flask import Blueprint, request, g
 from models.category import Category
 from models.resume import Resume, ResumeStatusEnum
 from utils.http import make_response, orm_to_dict
+from utils.image import unlink_image, link_image
 
 bp = Blueprint('resume', __name__, url_prefix='/resume')
 
@@ -17,10 +18,12 @@ def index_post():
     assert status in [ResumeStatusEnum.available, ResumeStatusEnum.draft]
 
     if id_:
-        item = g.db.query(Resume).filter(Resume.id == id_, Resume.agency_id == g.agency.id).first()
+        item = g.db.query(Resume).filter(Resume.id == id_, Resume.agency_id == g.agency.id).one()
 
     if not item:
-        item = Resume(agency_id=g.agency.id, status=status, role_id=g.role.id)
+        item = Resume(
+            agency_id=g.agency.id, status=status, role_id=g.role.id,
+        )
         g.db.add(item)
 
     item.name = data['name']
@@ -38,12 +41,23 @@ def index_post():
     item.telegram = data.get('telegram')
     item.email = data.get('email')
     item.linkedin = data.get('linkedin')
-    item.phone_number = data.get('phone_number')
+    item.phone_number = data['phone_number']
 
     item.categories = g.db.query(Category).filter(
         Category.parent_id.isnot(None),
         Category.id.in_([i['id'] for i in data['categories'] if i.get('id') is not None])
     ).all()
+
+    if not id_:
+        g.db.flush()
+
+    if data['photo'] and (item.photo is None or item.photo['id'] != data['photo']['id']):
+        if item.photo is not None:
+            unlink_image(f'resume_photo_{item.id}')
+        link_image(f'resume_photo_{item.id}', data['photo']['id'])
+        item.photo = data['photo']
+    elif id_:
+        unlink_image(f'resume_photo_{item.id}')
 
     g.db.commit()
 

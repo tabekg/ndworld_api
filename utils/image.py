@@ -1,9 +1,11 @@
+from typing import Optional
+
 import requests
 
 from utils.config import config
 
 
-def link_image(image_id, name):
+def link_image(name: str, image_id: int):
     response = requests.post(config.get('besoft_cloud', 'api_url') + '/tp/v1/image/link', params={
         '_project_key': config.get('besoft_cloud', 'public_key'),
     }, json={
@@ -20,7 +22,7 @@ def link_image(image_id, name):
     return json['payload']
 
 
-def unlink_image(image_id, name):
+def unlink_image(name: str, image_id: Optional[int] = None):
     response = requests.post(config.get('besoft_cloud', 'api_url') + '/tp/v1/image/unlink', params={
         '_project_key': config.get('besoft_cloud', 'public_key'),
     }, json={
