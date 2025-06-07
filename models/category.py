@@ -23,6 +23,7 @@ class Category(Base):
         backref='children'
     )
     resumes = relationship("Resume", secondary=resume_categories, back_populates="categories")
+    workers = relationship("Worker", back_populates="category", passive_deletes=True)
 
     def to_dict_item(self):
         return orm_to_dict(self, [

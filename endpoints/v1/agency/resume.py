@@ -56,8 +56,6 @@ def index_post():
             unlink_image(f'resume_photo_{item.id}')
         link_image(f'resume_photo_{item.id}', data['photo']['id'])
         item.photo = data['photo']
-    elif id_:
-        unlink_image(f'resume_photo_{item.id}')
 
     g.db.commit()
 

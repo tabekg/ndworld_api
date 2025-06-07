@@ -97,6 +97,7 @@ class Resume(Base):
             'experiences': lambda a: orm_to_dict(a.experiences),
             'educations': lambda a: orm_to_dict(a.educations),
             'skills': lambda a: orm_to_dict(a.skills),
+            'categories': lambda a: orm_to_dict(a.categories),
         })
 
 

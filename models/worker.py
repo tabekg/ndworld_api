@@ -36,6 +36,7 @@ class Worker(Base):
     agency_id = Column(Integer, ForeignKey('agencies.id', ondelete='CASCADE'), nullable=False)
     company_id = Column(Integer, ForeignKey('companies.id', ondelete='CASCADE'), nullable=False)
     resume_id = Column(Integer, ForeignKey('resumes.id', ondelete='CASCADE'), nullable=False)
+    category_id = Column(Integer, ForeignKey('categories.id', ondelete='CASCADE'), nullable=False)
 
     level = Column(Integer, nullable=False, default=WORKER_LEVEL_PENDING, server_default=f'{WORKER_LEVEL_PENDING}')
     payload = Column(mutable_json_type(dbtype=JSONB, nested=True), nullable=True)
@@ -43,5 +44,6 @@ class Worker(Base):
     agency = relationship("Agency", back_populates="workers", foreign_keys="Worker.agency_id")
     company = relationship("Company", back_populates="workers", foreign_keys="Worker.company_id")
     resume = relationship("Resume", back_populates="workers", passive_deletes=True)
+    category = relationship("Category", back_populates="workers", passive_deletes=True)
 
     steps = relationship("WorkerStep", back_populates="worker", foreign_keys="WorkerStep.worker_id")
