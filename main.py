@@ -10,7 +10,7 @@ from utils.config import STORAGE_PATH, STORAGE_DIRECTORIES, DEFAULT_LANGUAGE
 from utils.exception import ResponseException
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})
+CORS(app, resources={r"/*": {"origins": "*"}}, allow_headers=["Content-Type", "Accept-Language"])
 
 
 @app.before_request
