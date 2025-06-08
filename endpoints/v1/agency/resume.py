@@ -3,7 +3,7 @@ from flask import Blueprint, request, g
 from models.category import Category
 from models.resume import Resume, ResumeStatusEnum
 from utils.http import make_response, orm_to_dict
-from utils.image import unlink_image, link_image
+from utils.image import set_image, set_images
 
 bp = Blueprint('resume', __name__, url_prefix='/resume')
 
@@ -28,20 +28,24 @@ def index_post():
 
     item.name = data['name']
     item.surname = data['surname']
-    item.patronymic = data.get('patronymic')
+    item.patronymic = data.get('patronymic') or None
 
-    item.summary = data.get('summary')
-    item.marital_status = data.get('marital_status')
-    item.birth_date = data.get('birth_date') if data.get('birth_date') else None
-    item.about = data.get('about')
-    item.residential_address = data.get('residential_address')
-    item.registered_address = data.get('registered_address')
+    item.summary = data.get('summary') or None
+    item.marital_status = data.get('marital_status') or None
+    item.birth_date = data.get('birth_date') or None
+    item.about = data.get('about') or None
+    item.residential_address = data.get('residential_address') or None
+    item.registered_address = data.get('registered_address') or None
 
-    item.instagram = data.get('instagram')
-    item.telegram = data.get('telegram')
-    item.email = data.get('email')
-    item.linkedin = data.get('linkedin')
+    item.instagram = data.get('instagram') or None
+    item.telegram = data.get('telegram') or None
+    item.email = data.get('email') or None
+    item.linkedin = data.get('linkedin') or None
     item.phone_number = data['phone_number']
+    if data.get('phone_numbers'):
+        item.phone_numbers = [i.trim() for i in data['phone_numbers'] if i and i.trim()]
+    else:
+        item.phone_numbers = []
 
     item.categories = g.db.query(Category).filter(
         Category.parent_id.isnot(None),
@@ -51,11 +55,23 @@ def index_post():
     if not id_:
         g.db.flush()
 
-    if data['photo'] and (item.photo is None or item.photo['id'] != data['photo']['id']):
-        if item.photo is not None:
-            unlink_image(f'resume_photo_{item.id}')
-        link_image(f'resume_photo_{item.id}', data['photo']['id'])
-        item.photo = data['photo']
+    if data.get('photos'):
+        pass
+
+    item.photo = set_image(f'resume_photo_{item.id}', data.get('photo'), item.photo, required=True)
+    item.passport_front = set_image(
+        f'resume_passport_front_{item.id}',
+        data.get('passport_front'), item.passport_front, required=False,
+    )
+    item.passport_back = set_image(
+        f'resume_passport_back_{item.id}',
+        data.get('passport_back'), item.passport_back, required=False,
+    )
+    item.birth_certificate = set_image(
+        f'resume_birth_certificate_{item.id}',
+        data.get('birth_certificate'), item.birth_certificate, required=False,
+    )
+    item.photos = set_images(f'resume_photos_{item.id}', data.get('photos'), item.photos, min_count=0, max_count=10)
 
     g.db.commit()
 
