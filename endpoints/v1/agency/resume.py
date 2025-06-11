@@ -43,7 +43,7 @@ def index_post():
     item.linkedin = data.get('linkedin') or None
     item.phone_number = data['phone_number']
     if data.get('phone_numbers'):
-        item.phone_numbers = [i.trim() for i in data['phone_numbers'] if i and i.trim()]
+        item.phone_numbers = [i.strip() for i in data['phone_numbers']]
     else:
         item.phone_numbers = []
 
